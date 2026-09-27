@@ -5,6 +5,7 @@ export default tseslint.config(
   {
     ignores: [
       "dist/**",
+      ".test-build/**",
       "node_modules/**",
       "src/generated/**",
       "test-results/**",

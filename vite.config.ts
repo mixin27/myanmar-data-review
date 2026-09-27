@@ -1,8 +1,9 @@
 import { defineConfig } from "vitest/config";
+import { resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     tailwindcss(),
@@ -23,6 +24,20 @@ export default defineConfig({
     },
   ],
   worker: { format: "es" },
-  build: { manifest: true, sourcemap: false, target: "es2022" },
+  build: {
+    outDir: mode === "integration" ? ".test-build" : "dist",
+    manifest: true,
+    sourcemap: false,
+    target: "es2022",
+    rolldownOptions: {
+      input:
+        mode === "integration"
+          ? {
+              app: resolve("index.html"),
+              workerTest: resolve("tests/browser/worker.html"),
+            }
+          : resolve("index.html"),
+    },
+  },
   test: { include: ["tests/**/*.test.ts"], environment: "node" },
-});
+}));

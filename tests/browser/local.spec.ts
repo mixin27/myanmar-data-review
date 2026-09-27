@@ -44,7 +44,7 @@ test("production worker matches pinned services and does not upload or persist t
       body: `{${guard}}\n${await response.text()}`,
     });
   });
-  await page.goto("/");
+  await page.goto("/tests/browser/worker.html");
   const initialCount = network.length;
   for (const text of [
     sample("strong-unicode"),
@@ -122,7 +122,7 @@ test("keyboard run, cancellation and edit invalidation cannot show stale results
     await blocked;
     await route.continue();
   });
-  await page.goto("/");
+  await page.goto("/tests/browser/worker.html");
   await page.getByLabel("Text to inspect").fill(sample("strong-zawgyi"));
   await page.getByRole("button", { name: "Run locally" }).focus();
   await page.keyboard.press("Enter");
@@ -147,7 +147,7 @@ test("failed worker startup recovers only on an explicit new run", async ({
   page,
 }) => {
   await page.route("**/engine.worker-*.js", (route) => route.abort());
-  await page.goto("/");
+  await page.goto("/tests/browser/worker.html");
   await page.getByLabel("Text to inspect").fill("hello");
   await page.getByRole("button", { name: "Run locally" }).click();
   await expect(page.getByRole("status")).toContainText("worker_failure");
@@ -160,7 +160,7 @@ test("failed worker startup recovers only on an explicit new run", async ({
 test("application input failure stays distinct from an unchanged result", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/tests/browser/worker.html");
   await page.getByLabel("Text to inspect").fill("x".repeat(100001));
   await page.getByRole("button", { name: "Run locally" }).click();
   await expect(page.getByRole("status")).toContainText("text_too_long");
@@ -200,7 +200,7 @@ test("timeout terminates a stuck worker and the next run uses a fresh worker", a
       }
     };
   });
-  await page.goto("/");
+  await page.goto("/tests/browser/worker.html");
   await page.getByLabel("Text to inspect").fill("hello");
   await page.getByRole("button", { name: "Run locally" }).click();
   await expect(page.getByRole("status")).toContainText("timeout:");

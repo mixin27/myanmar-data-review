@@ -19,11 +19,12 @@
     "build": "pnpm generate && vite build && node scripts/verify-bundle.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "test:consumer": "node scripts/test-consumer.mjs",
-    "test:browser": "playwright test",
+    "test:browser": "pnpm build:integration && playwright test",
     "check": "pnpm generate && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:consumer",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify:clean": "node scripts/verify-clean.mjs"
+    "verify:clean": "node scripts/verify-clean.mjs",
+    "build:integration": "pnpm generate && vite build --mode integration && node scripts/verify-bundle.mjs .test-build"
   },
   "dependencies": {
     "react": "19.3.0",

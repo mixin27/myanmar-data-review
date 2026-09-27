@@ -1,38 +1,52 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, existsSync } from "node:fs";
-const assets = new URL("../dist/assets/", import.meta.url);
+import { resolve, join } from "node:path";
+const output = resolve(process.argv[2] ?? "dist");
+const integration = process.argv[2] === ".test-build";
+const assets = join(output, "assets");
 const files = readdirSync(assets);
-const workers = files.filter((file) => /^engine\.worker-.*\.js$/.test(file));
-assert.equal(workers.length, 1, "Expected a dedicated production worker chunk");
-const worker = readFileSync(new URL(workers[0], assets), "utf8");
-assert.ok(
-  worker.includes("zawgyi-unicode-v1"),
-  "Worker must contain the installed engine",
+const csvWorkers = files.filter((file) => /^import\.worker-.*\.js$/.test(file));
+assert.equal(csvWorkers.length, 1, "Expected a dedicated CSV worker chunk");
+const languageWorkers = files.filter((file) =>
+  /^engine\.worker-.*\.js$/.test(file),
+);
+assert.equal(
+  languageWorkers.length,
+  integration ? 1 : 0,
+  "Language worker belongs to the integration harness until dataset review ships",
 );
 for (const file of files.filter(
-  (file) => file.endsWith(".js") && !workers.includes(file),
+  (file) => file.endsWith(".js") && !languageWorkers.includes(file),
 )) {
-  const source = readFileSync(new URL(file, assets), "utf8");
+  const source = readFileSync(join(assets, file), "utf8");
   assert.ok(
     !source.includes("zawgyi-unicode-v1"),
-    "Engine leaked into main-thread bundle",
+    "Language engine leaked into main-thread bundle",
   );
-  assert.ok(
-    !source.includes("google-zawgyi"),
-    "Engine model leaked into main-thread bundle",
-  );
+  if (!integration) {
+    assert.ok(
+      !source.includes("Integration diagnostics"),
+      "Test screen leaked into product",
+    );
+    assert.ok(
+      !source.includes("Milestone 1"),
+      "Development copy leaked into product",
+    );
+  }
 }
-assert.ok(
-  existsSync(new URL("../dist/licenses/Apache-2.0.txt", import.meta.url)),
-);
-assert.ok(
-  existsSync(new URL("../dist/licenses/MyanLex-MIT.txt", import.meta.url)),
-);
-assert.ok(
-  existsSync(
-    new URL("../dist/licenses/MyanLex-THIRD_PARTY_NOTICES.md", import.meta.url),
-  ),
-);
+if (integration)
+  assert.ok(
+    readFileSync(join(assets, languageWorkers[0]), "utf8").includes(
+      "zawgyi-unicode-v1",
+    ),
+  );
+else assert.ok(!existsSync(join(output, "tests")), "Test routes must not ship");
+for (const file of [
+  "Apache-2.0.txt",
+  "MyanLex-MIT.txt",
+  "MyanLex-THIRD_PARTY_NOTICES.md",
+])
+  assert.ok(existsSync(join(output, "licenses", file)));
 console.log(
-  "Dedicated worker bundle, main-thread separation and shipped notices verified.",
+  "Dedicated workers, main-thread separation, product-only entrypoints and shipped notices verified.",
 );

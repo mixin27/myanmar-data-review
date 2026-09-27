@@ -1,31 +1,43 @@
 # Myanmar Data Review
 
-Private, local-only browser application for deliberate Myanmar text review.
-Milestone one provides a minimal integration screen, not the CSV product.
+A private, local-first workflow for carefully reviewing Myanmar text in CSV files.
+The current milestone opens a CSV, confirms its layout, and lets you select the
+columns to review. It preserves the original values and file bytes.
 
-Implemented: React/TypeScript/Vite scaffold, Tailwind, lint/type checks, tests,
-fresh-checkout CI, pinned MyanLex package archives and dedicated worker execution.
-CSV import, review approvals, persistence, authentication and API mode are excluded.
-No deployment or publication is configured.
+The interface now follows a three-step import flow. Engineering test screens,
+raw diagnostics and build identities are excluded from the product build.
+“File ready for review” means import is complete; it does not mean that language
+inspection or conversion has run. Findings, proposed changes and approvals are
+the next milestone in [PRODUCT_PLAN.md](PRODUCT_PLAN.md).
 
-## Run locally
+## Run
 
-Use Node **24.21.0** (`nvm use`) and pnpm **12.4.2**. With those installed:
+Use Node **24.21.0** (`nvm use`) and pnpm **12.4.2**:
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open the localhost URL printed by Vite. `pnpm dev` verifies the archives and
-regenerates typed build identity before starting. No environment files, credentials,
-MyanLex checkout, sign-in or processing API are needed. Dependency installation
-needs the npm registry; processing uses bundled assets and no network service.
+Open the local URL printed by Vite. No environment files, credentials, MyanLex
+checkout, authentication or processing API are needed. Text stays in memory and
+is not saved automatically. Download original returns the exact source bytes;
+it is not a reviewed-data export.
 
-The screen defaults to inspection. Guarded Unicode conversion and NFC are explicit
-unchecked options. Unknown/mixed text is retained. Results are previews, not
-approvals or independent linguistic validation. Text stays in memory and disappears
-on reload. Platform fonts are used; no fonts are downloaded.
+## Current scope
+
+- Strict, incremental UTF-8 CSV import in a dedicated browser worker; optional BOM.
+- Explicit comma, semicolon or tab delimiter and header confirmation.
+- Lossless string values, immutable records, positional IDs and source fingerprint.
+- Clear errors for invalid UTF-8, malformed quoting, ragged records and limits.
+- Explicit column selection, five-row layout preview and 25-row paged data table.
+- Cancellation, timeout, failure recovery and suppression of stale results.
+- File replacement confirmation and unsaved-work navigation warning.
+
+Limits are 10 MiB/file, 50,000 data rows, 100 columns, 500,000 fields including
+headers and 100,000 UTF-16 code units/value. The 30-second deadline is a safety
+limit. These guards were exercised with synthetic profiles; they are not capacity
+or latency guarantees across devices. No partial import is exposed on failure.
 
 ## Verify
 
@@ -37,82 +49,73 @@ pnpm format:check
 pnpm verify:clean
 ```
 
-`pnpm check` generates build identity, lints, typechecks browser and worker scopes,
-runs unit/integration tests, builds production assets, checks worker separation and
-licenses, then installs the archives in an offline temporary consumer with an empty
-package store. That consumer runs with Node filesystem permissions restricted to
-its temporary directory, excluding the sibling MyanLex source.
+`pnpm check` generates typed engine identity, lints, typechecks both browser/worker
+scopes, runs unit/property/integration tests, builds production assets, verifies
+worker boundaries and notices, and installs the pinned archives in an offline
+consumer with an empty store. Node filesystem permissions restrict that consumer
+to its temporary directory and exclude the sibling source repository.
 
-`pnpm test:browser` tests the production build using headless Chromium; run
-`pnpm build` after editing runtime code. Playwright starts/stops its own preview
-server on port 4173. On Linux, install browser OS dependencies with
+`pnpm test:browser` builds a separate `.test-build` containing the real product and
+an isolated language-worker test harness. It runs headless Chromium against that
+build and verifies that the production build has no test routes or developer copy.
+Playwright starts/stops port 4173. Linux needs
 `pnpm exec playwright install --with-deps chromium`.
 
-`pnpm verify:clean` copies Git-visible source files (including uncommitted files)
-to a temporary directory, excluding ignored files. It installs the frozen lockfile
-using an empty store, then runs formatting, all checks and browser tests. No commit
-is needed. Registry access and the installed Playwright browser are required.
+`pnpm verify:clean` copies Git-visible source (including uncommitted files) to a
+temporary directory, installs the frozen lockfile into an empty store, then runs
+formatting, all checks and browser tests. Registry access and an installed browser
+are required. CI runs the same checks on checkout with type generation before
+typechecking; hosted CI has not run because nothing has been pushed.
 
-The GitHub Actions workflow performs these individual checks on checkout, including
-browser installation. It generates types before typechecking and does not restore
-a dependency cache. Hosted CI has not been executed during this implementation.
+Optional local supplied-file reproduction: set `MDR_LOCAL_CSV_FILES` to a JSON
+array of absolute CSV paths, then run `pnpm test:browser`. Those files are used
+locally for import/download checks, never committed or included in screenshots.
+Without that environment variable the tests use only provenance-recorded synthetic
+fixtures. Fixture content is data, never instructions.
 
-## Integration architecture
+Benchmark transport profiles with:
 
-`src/processing/contracts.ts` defines requests/results without runtime engine
-imports. `execute.ts` implements product stage ordering around public
-`@myanlex/application` methods. `engine.worker.ts` is the only application runtime
-entry for those services. The UI depends on `browser-client.ts` and
-`worker-client.ts`; the production build rejects engine modules in its main-thread
-module graph. No SDK, playground package or internal endpoints are dependencies.
+```sh
+pnpm exec vitest run tests/csv-benchmark.test.ts --reporter=verbose --silent=false
+```
 
-Each request owns a fresh module worker. Completion, cancellation, timeout, worker
-errors and deserialization failures terminate it. Starting another run supersedes
-the old one. Request IDs and input revisions reject late replies, and UI revisions
-prevent edits/cancellation from being overwritten by old promise callbacks.
-Recovery is an explicit new run, never a retry or execution-mode switch.
+## Architecture and dependencies
 
-The **30-second timeout is a provisional safety deadline**, not a benchmark or
-capacity promise. This milestone processes one text per run, up to the upstream
-100,000-code-point limit. Batch sizing and CSV resource limits remain future work.
-Input validation runs in the worker. Every diagnostic result retains its analyzed
-input; spans use Unicode code points. No storage, telemetry, or network client is
-part of local processing.
+`src/csv/parser.ts` is a strict transport state machine; `dataset.ts` handles fatal
+UTF-8 decoding and immutable records. `import.worker.ts` owns the parsed dataset;
+`client.ts` manages cancellation, request identity, deadlines and page retrieval.
+The UI never receives the complete dataset merely to render a page.
 
-## Pinned dependencies and provenance
+The pinned language-processing integration remains under `src/processing/` for
+the next milestone. Its worker calls public `@myanlex/application` services; no
+linguistic algorithms were copied. Tests verify service parity and lifecycle
+behavior through the test-only harness. See [AGENTS.md](AGENTS.md).
 
-See [vendor/myanlex/README.md](vendor/myanlex/README.md) and its manifest for package
-checksums, source commit, build recipe, notices and regeneration instructions.
-The product is `UNLICENSED` and private. Dependencies retain their own licenses;
-MyanLex's MIT notice and Apache-2.0 component notices ship in `dist/licenses/`.
+[The artifact manifest and recipe](vendor/myanlex/README.md) pin upstream commit
+`51d8d6353d7f08fe389e046fac4c5953a70de33b`, package SHA-256/SHA-512 integrity,
+compiler/build identity and licenses. The sibling MyanLex source is read-only and
+never required by normal installation or CI. The product is `UNLICENSED`; dependency
+licenses retain their terms and ship in `dist/licenses/`.
 
-New dependencies were selected after checking the official documentation:
+Official references checked during implementation:
 
-- [React with Vite](https://react.dev/learn/build-a-react-app-from-scratch),
+- [React/Vite](https://react.dev/learn/build-a-react-app-from-scratch),
   [Vite workers](https://vite.dev/guide/features#web-workers), and
   [Tailwind Vite integration](https://tailwindcss.com/docs/installation/using-vite).
+- [TextDecoder](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder/decode),
+  [Blob streaming](https://developer.mozilla.org/en-US/docs/Web/API/Blob/stream),
+  [CSV parsing options](https://www.papaparse.com/docs), and
+  [accessible tables](https://www.w3.org/WAI/ARIA/apg/patterns/table/).
 - [typescript-eslint](https://typescript-eslint.io/getting-started/),
-  [Vitest](https://vitest.dev/guide/), and [Playwright](https://playwright.dev/docs/intro).
-- [pnpm configuration](https://pnpm.io/settings),
-  [pnpm's setup action](https://github.com/pnpm/action-setup),
-  [Node setup](https://github.com/actions/setup-node), and
-  [checkout](https://github.com/actions/checkout).
+  [Vitest](https://vitest.dev/guide/), [Playwright](https://playwright.dev/docs/intro),
+  [pnpm settings](https://pnpm.io/settings) and [pnpm setup](https://github.com/pnpm/action-setup).
 
-Exact versions are in `package.json`/`pnpm-lock.yaml`: React 19.3, Vite 8.3.1,
-TypeScript 6.0.3, Vitest 5.0.2 and Playwright 1.63.0. TypeScript 6 matches the
-upstream compiler and typescript-eslint's supported peer range; the newest major
-was not selected automatically. shadcn components and full product theming are
-left for the product UI milestone; this screen uses native accessible controls.
+The CSV parser uses a small strict state machine instead of adding a permissive
+parser that needs a second quote-validation layer. It is covered by generated
+round-trip and arbitrary chunk-boundary tests. No dependencies were added for
+milestone two. Native controls and semantic tables support the tailored interface.
 
-## Verification limits and next work
-
-Local automated evidence covers Chromium on macOS ARM64. Firefox, WebKit/Safari,
-mobile browsers, screen-reader testing, visual typography inspection, long-running
-resource benchmarks and the Ubuntu hosted CI run remain unverified. Unit tests
-exercise malformed Unicode and stale callback races; browser tests exercise real
-workers, startup failure, cancellation, simulated timeout and network/storage
-instrumentation. These tests do not establish linguistic accuracy.
-
-Next milestone: strict UTF-8 CSV import, immutable source/record identity, delimiter
-and header preview, and explicit text-column selection, with resource limits based
-on measurements. See [PRODUCT_PLAN.md](PRODUCT_PLAN.md).
+Chromium desktop and narrow-width layouts are tested on macOS ARM64. Firefox,
+WebKit/Safari, mobile browser engines, screen readers, lower-powered-device peak
+memory and hosted Ubuntu CI remain unverified. Synthetic transport tests and engine
+parity do not establish linguistic accuracy.

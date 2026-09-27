@@ -1,8 +1,7 @@
 # Myanmar Data Review — product and implementation plan
 
-Status: milestone one implemented and verified in a clean local source snapshot.
-Hosted CI and broader browser verification remain pending. Later product milestones
-are not implemented.
+Status: milestone one committed; milestone two (CSV import and selection) implemented
+and locally verified. Inspection, proposals and approvals remain the next milestone. Hosted CI and broader browser verification remain pending.
 
 This is a standalone product consuming MyanLex, not another developer playground.
 Its purpose is to help one operator review legacy Myanmar text in CSV records,
@@ -23,11 +22,16 @@ Demand and real-world usability still need validation with prospective users.
   Hosted artifacts and registry publication are not required for v1.
 - Device-local save/resume is included in the first release, by explicit consent.
 - Preserve original values; uncertain or mixed encoding must not be silently repaired.
-- Use synthetic test datasets with recorded provenance; the user has no CSV samples.
-- Implementation is authorized only for milestone one: scaffolding/tooling,
-  fresh-checkout CI, reproducible MyanLex packages, and dedicated local worker
-  processing. Do not deploy, publish, commit, push, or change GitHub settings
-  without separate authorization.
+- Use synthetic test datasets with recorded provenance. Two user-supplied CSVs
+  are now available for local troubleshooting only; do not commit or redistribute them.
+- Milestone one was authorized and committed at the user's request as `92d0a98`.
+  Milestone two is authorized: CSV import, original-data preview and column selection.
+  Follow the delivery sequence; do not expand it based on ambiguous “no changes”
+  feedback. No deployment, package publication, push or GitHub settings change is authorized.
+- All product UI copy must be end-user focused. Remove developer status screens,
+  raw JSON, build identities and worker terminology from production. Design for a
+  coherent workflow with a clear hierarchy and next action; simplicity alone is
+  not the design goal. Label original values separately from processing outcomes.
 - Repository visibility: private. No open-source license for the product yet.
   This records intent only; changing GitHub settings remains separately authorized.
   Preserve dependency licenses and third-party notices in packaged artifacts.
@@ -218,7 +222,7 @@ Acceptance gates:
 
 These implementation defaults make the remaining behavior concrete and remain
 open to revision. Explicit user decisions are recorded separately above. The current
-implementation authorization covers only milestone one, not the full baseline.
+implementation authorization covers milestones one and two, not the full baseline.
 
 - **Application:** React + TypeScript + Vite, with the proposed shadcn/ui and
   Tailwind approach. Build a static browser application with worker-based local
@@ -335,6 +339,66 @@ No necessary upstream changes or essential unresolved milestone-one product
 decisions were found. Future API authentication and CSV/export details do not block
 this milestone.
 
+## Milestone two progress — 2026-09-28
+
+Implemented:
+
+- A redesigned three-step import flow: choose file, confirm delimiter/header layout,
+  choose text columns. No columns are selected automatically. A responsive file
+  overview displays original values, selection controls and original-file download.
+- All production content is user-facing. The old engineering screen now exists only
+  in the integration-test build. “No changes applied” was removed: importing a file
+  is not a completed language review. This milestone ends at “File ready for review”.
+- Strict UTF-8 decoding in 64 KiB chunks, optional BOM, an incremental strict CSV
+  parser in a dedicated worker, and immutable string records. No implicit trimming,
+  type conversion, quote repair, row padding or skipped blank records.
+- Comma/semicolon/tab support, duplicate/empty headers with positional column IDs,
+  stable source-record IDs, SHA-256 source fingerprint, exact original-byte retention,
+  malformed-quote/ragged-record errors with record/line/field locations, and no
+  partially usable import after failure. A terminal record separator adds no extra row.
+- Worker termination on cancel/timeout/failure, revision protection on option
+  changes, explicit retry, bounded five-row layout preview and 25-row table pages.
+  Parsed records stay in the worker; only visible pages cross to the UI.
+- File replacement confirmation and browser-native unsaved-work navigation warning.
+  No automatic persistence or processing network requests.
+- Import resource guards: 10 MiB, 50,000 data rows, 100 columns, 500,000 fields
+  including headers, and 100,000 UTF-16 code units per value. These are conservative
+  implementation guards, not a cross-device performance guarantee. The 30-second
+  timeout covers an import/page request; cancellation terminates that worker.
+
+Measurements and verification:
+
+- Representative Node/macOS ARM64 import profiles after memory optimization:
+  50,000 × 5 values (1.4 MB): 78 ms / 16.2 MiB heap delta; 100 columns × 4,999 data
+  rows (2 MB): 114 ms / 17.4 MiB; a 10.4 MB long-field profile: 419 ms / 60.3 MiB.
+  Heap deltas are not peak/browser memory measurements. The long-field profile
+  informed the bounded character accumulation strategy before setting the guard.
+- Chromium imported and paged a 50,000-row synthetic file in about 0.7 seconds on
+  this host, rendering only 25 rows. This is an observed test, not a latency promise.
+- Unit/property checks cover quoted delimiters/newlines, escaped quotes, chunk
+  boundaries, BOM/invalid UTF-8, emoji, leading zeros, duplicate/empty headers,
+  hostile-looking markup, formula-like strings, resource limits and worker recovery.
+- Automated Chromium tests cover keyboard navigation, layout/header changes,
+  explicit selections, cancellation/retry, original downloads, privacy, pagination,
+  and desktop/narrow layout overflow. Synthetic-data screenshots are used for visual
+  review. User-supplied files are tested only through an opt-in local test path.
+- `pnpm verify:clean` passed in an isolated source snapshot with an empty package
+  store: frozen install, formatting, generation, lint, both typechecks, 55 tests,
+  production build, isolated installed-artifact consumption and 12 Chromium tests.
+  No sibling source or pre-existing generated output was used.
+- A separate Chromium run passed all 14 tests, including both opt-in local CSV
+  checks. The supplied files imported 611 and 508 data rows respectively; original
+  downloads matched their source bytes exactly. Source contents are not committed.
+- Desktop and narrow screenshots made from synthetic data were visually reviewed.
+  Milestone two changes remain uncommitted; milestone one is committed as above.
+
+Still outside this milestone: language findings in the product, conversion
+proposals, cell/bulk approval, save/resume and reviewed exports. The next milestone
+must provide these review semantics together rather than treating import status as
+an analysis result. Paged previews must not become a limit on eventual processing
+or export completeness. Hosted Ubuntu CI, Firefox/WebKit, screen-reader testing,
+and peak-memory measurements on lower-powered devices remain unverified.
+
 ## Delivery sequence
 
 1. On a follow-up implementation request, use the confirmed local-only,
@@ -351,6 +415,5 @@ this milestone.
    execution after its design gate is resolved.
 
 The user need not purchase a domain, provision hosting, publish packages, or supply
-production credentials. Milestone one was explicitly authorized. Further product
-implementation requires a follow-up request; the next milestone is lossless CSV
-import, immutable source/record identity, preview, and explicit column selection.
+production credentials. The next milestone is local inspection, proposed changes,
+review queues and approvals, following the confirmed processing/review semantics.

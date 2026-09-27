@@ -15,3 +15,9 @@ HTML-looking strings and combining Latin accents) are project-authored synthetic
 cases. Their test use is permitted with this private project's source. Tests
 compare linguistic results to the pinned public application services; no new
 linguistic ground truth is asserted.
+
+Milestone-two CSV fixtures are generated in tests. Their values (IDs, placeholder
+customer fields, quotes, line breaks, emoji, markup and formula-like strings) are
+project-authored transport examples, with no claimed linguistic expected results.
+Large datasets are generated at runtime. Supplied user CSVs are opt-in local test
+inputs only and are not copied into this repository or screenshots.
