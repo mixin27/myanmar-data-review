@@ -1,0 +1,32 @@
+name: Verify milestone one
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.4.2
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - name: Verify vendored artifacts before installation
+        run: node scripts/verify-artifacts.mjs
+      - run: pnpm install --frozen-lockfile
+      - name: Generate typed build identity before lint and typecheck
+        run: pnpm generate
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: Install archives in an offline isolated consumer with an empty store
+        run: pnpm test:consumer
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:browser

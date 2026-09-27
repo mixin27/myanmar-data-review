@@ -1,0 +1,8 @@
+node_modules
+dist
+vendor
+public/licenses
+src/generated
+pnpm-lock.yaml
+test-results
+playwright-report

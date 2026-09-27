@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "upstreamCommit": "51d8d6353d7f08fe389e046fac4c5953a70de33b",
+  "packageVersion": "0.0.0-mdr.51d8d6353d7f",
+  "compiler": "Version 6.0.3",
+  "recipe": "scripts/package-myanlex.py",
+  "recipeSha256": "2b20df2b619aab8c0e5a3beac9f879edf414a82469d2792ffaf9c7d0f5bef18c",
+  "compilerOverlay": {
+    "types": [],
+    "sourceMap": false,
+    "declarationMap": false
+  },
+  "archive": "sorted USTAR, uid/gid/mtime=0, gzip mtime=0, level=9",
+  "artifacts": [
+    {
+      "name": "@myanlex/types",
+      "version": "0.0.0-mdr.51d8d6353d7f",
+      "file": "myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz",
+      "sha256": "e1429a1cea32112258b1fa4ef1f62b58dfad8833bd074b8c777fd33014a3e239",
+      "bytes": 6886,
+      "sourceTree": "03fb912f73cd7c03bff1a0ec933b3e17cbb9d9f8"
+    },
+    {
+      "name": "@myanlex/core",
+      "version": "0.0.0-mdr.51d8d6353d7f",
+      "file": "myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz",
+      "sha256": "a9efeb262f7f315a38fafbfdd984fb33b05d951f6284ff611d7ae54bc867d853",
+      "bytes": 48134,
+      "sourceTree": "95677a4719c8ea060c0d6c75e62ef072be465b56"
+    },
+    {
+      "name": "@myanlex/application",
+      "version": "0.0.0-mdr.51d8d6353d7f",
+      "file": "myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz",
+      "sha256": "35253a38c83a32295914575b0eb74328d117387941bbb14b25899351c9f37e95",
+      "bytes": 8746,
+      "sourceTree": "16e5414c8aabf4505f2cb85c1f62cb8dbe85e7f0"
+    }
+  ],
+  "licenses": {
+    "Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "MyanLex-MIT.txt": "3c06aac77815be330d8e5777848c792617a12c2ee51d42410ba5c8fb30490d2e",
+    "MyanLex-THIRD_PARTY_NOTICES.md": "79ae10c691aff189264f4b4f70098b5100bb7f7c7c8aefb80fcfb2a0f958b534"
+  }
+}

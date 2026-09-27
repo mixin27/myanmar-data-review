@@ -1,0 +1,6 @@
+packages:
+  - .
+overrides:
+  "@myanlex/types": "file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz"
+  "@myanlex/core": "file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz"
+  "@myanlex/application": "file:vendor/myanlex/myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz"

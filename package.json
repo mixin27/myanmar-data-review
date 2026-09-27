@@ -1,0 +1,51 @@
+{
+  "name": "myanmar-data-review",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "packageManager": "pnpm@12.4.2",
+  "engines": {
+    "node": "24.21.x",
+    "pnpm": "12.4.2"
+  },
+  "scripts": {
+    "dev": "pnpm generate && vite --host 127.0.0.1",
+    "generate": "node scripts/generate.mjs",
+    "verify:artifacts": "node scripts/verify-artifacts.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.worker.json --noEmit",
+    "test": "vitest run",
+    "build": "pnpm generate && vite build && node scripts/verify-bundle.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "test:consumer": "node scripts/test-consumer.mjs",
+    "test:browser": "playwright test",
+    "check": "pnpm generate && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:consumer",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify:clean": "node scripts/verify-clean.mjs"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "@myanlex/types": "file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz",
+    "@myanlex/core": "file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz",
+    "@myanlex/application": "file:vendor/myanlex/myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "24.13.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "eslint": "10.10.0",
+    "prettier": "3.9.7",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1",
+    "vite": "8.3.1",
+    "vitest": "5.0.2"
+  }
+}

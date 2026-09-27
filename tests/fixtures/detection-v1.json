@@ -1,0 +1,158 @@
+{
+  "$schema": "../schema/encoding-detection.schema.json",
+  "schema_version": 1,
+  "profile": "zawgyi-unicode-v1",
+  "model": {
+    "name": "google-myanmar-tools",
+    "version": "1.2.0"
+  },
+  "thresholds": {
+    "unicode_max_probability": 0.05,
+    "zawgyi_min_probability": 0.95
+  },
+  "description": "Conservative standard Unicode and Zawgyi detection cases using the Google Myanmar Tools model.",
+  "license": "Apache-2.0",
+  "sources": [
+    "https://github.com/google/myanmar-tools",
+    "https://www.unicode.org/faq/myanmar.html"
+  ],
+  "derivation": "Strong, ambiguous, digit-only, and non-Burmese-language examples are selected from the Apache-2.0 Google Myanmar Tools compatibility fixtures. Mixed-input and offset cases exercise the project-authored wrapper behavior.",
+  "review_status": "source_verified",
+  "cases": [
+    {
+      "id": "empty-input",
+      "input": "",
+      "encoding": "non_myanmar",
+      "basis": "No Myanmar-range scalar is present.",
+      "segments": []
+    },
+    {
+      "id": "latin-and-emoji",
+      "input": "hello 😀",
+      "encoding": "non_myanmar",
+      "basis": "Non-Myanmar text is outside encoding detection.",
+      "segments": []
+    },
+    {
+      "id": "strong-unicode",
+      "input": "အပြည်ပြည်ဆိုင်ရာ လူ့အခွင့်အရေး ကြေညာစာတမ်း",
+      "encoding": "unicode",
+      "basis": "Google Myanmar Tools publishes this as its strong Unicode behavior example.",
+      "segments": [
+        {
+          "text": "အပြည်ပြည်ဆိုင်ရာ",
+          "encoding": "unicode",
+          "start": 0,
+          "end": 16
+        },
+        {
+          "text": "လူ့အခွင့်အရေး",
+          "encoding": "unicode",
+          "start": 17,
+          "end": 30
+        },
+        { "text": "ကြေညာစာတမ်း", "encoding": "unicode", "start": 31, "end": 42 }
+      ]
+    },
+    {
+      "id": "strong-zawgyi",
+      "input": "အျပည္ျပည္ဆိုင္ရာ လူ႔အခြင့္အေရး ေၾကညာစာတမ္း",
+      "encoding": "zawgyi",
+      "basis": "Google Myanmar Tools publishes this as its strong Zawgyi behavior example.",
+      "segments": [
+        {
+          "text": "အျပည္ျပည္ဆိုင္ရာ",
+          "encoding": "zawgyi",
+          "start": 0,
+          "end": 16
+        },
+        {
+          "text": "လူ႔အခြင့္အေရး",
+          "encoding": "zawgyi",
+          "start": 17,
+          "end": 30
+        },
+        { "text": "ေၾကညာစာတမ္း", "encoding": "zawgyi", "start": 31, "end": 42 }
+      ]
+    },
+    {
+      "id": "ambiguous-common-subset",
+      "input": "လူတို",
+      "encoding": "unknown",
+      "basis": "The upstream compatibility score is near one half, so the conservative profile does not guess.",
+      "segments": [
+        { "text": "လူတို", "encoding": "unknown", "start": 0, "end": 5 }
+      ]
+    },
+    {
+      "id": "myanmar-digits-have-no-model-signal",
+      "input": "၅၂၀",
+      "encoding": "unknown",
+      "basis": "The upstream model reports no Unicode-versus-Zawgyi signal for Myanmar digits alone.",
+      "segments": [
+        { "text": "၅၂၀", "encoding": "unknown", "start": 0, "end": 3 }
+      ]
+    },
+    {
+      "id": "myanmar-punctuation-is-ambiguous",
+      "input": "၊။",
+      "encoding": "unknown",
+      "basis": "Shared Myanmar punctuation does not cross either conservative probability threshold.",
+      "segments": [
+        { "text": "၊။", "encoding": "unknown", "start": 0, "end": 2 }
+      ]
+    },
+    {
+      "id": "mixed-separated-runs",
+      "input": "အပြည်ပြည်ဆိုင်ရာ / ေၾကညာစာတမ္း",
+      "encoding": "mixed",
+      "basis": "Separate Myanmar runs contain strong evidence for standard Unicode and Zawgyi respectively.",
+      "segments": [
+        {
+          "text": "အပြည်ပြည်ဆိုင်ရာ",
+          "encoding": "unicode",
+          "start": 0,
+          "end": 16
+        },
+        { "text": "ေၾကညာစာတမ္း", "encoding": "zawgyi", "start": 19, "end": 30 }
+      ]
+    },
+    {
+      "id": "non-myanmar-affixes-do-not-change-result",
+      "input": "hello အပြည်ပြည်ဆိုင်ရာ world",
+      "encoding": "unicode",
+      "basis": "The model is applied only to the Myanmar run and preserves code-point offsets.",
+      "segments": [
+        {
+          "text": "အပြည်ပြည်ဆိုင်ရာ",
+          "encoding": "unicode",
+          "start": 6,
+          "end": 22
+        }
+      ]
+    },
+    {
+      "id": "standard-shan-is-not-zawgyi",
+      "input": "ထၢမ်တွပ်ႇ",
+      "encoding": "unicode",
+      "basis": "The upstream multilingual training and compatibility fixture identify this standard Shan text as Unicode, avoiding a common regex-detector false positive.",
+      "segments": [
+        { "text": "ထၢမ်တွပ်ႇ", "encoding": "unicode", "start": 0, "end": 9 }
+      ]
+    },
+    {
+      "id": "emoji-safe-offset",
+      "input": "😀အျပည္ျပည္ဆိုင္ရာ",
+      "encoding": "zawgyi",
+      "basis": "Offsets count Unicode code points rather than UTF-16 code units.",
+      "segments": [
+        {
+          "text": "အျပည္ျပည္ဆိုင္ရာ",
+          "encoding": "zawgyi",
+          "start": 1,
+          "end": 17
+        }
+      ]
+    }
+  ]
+}
