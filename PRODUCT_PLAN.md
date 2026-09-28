@@ -1,7 +1,7 @@
 # Myanmar Data Review — product and implementation plan
 
-Status: milestones one and two committed. Milestone three (local inspection,
-proposals, review queues and approvals) implemented and locally verified.
+Status: milestones one through three committed. Milestone four (exports, reports,
+explicit save/resume and portable backups) implemented and locally verified; uncommitted.
 Hosted CI and broader browser/accessibility verification remain pending.
 
 This is a standalone product consuming MyanLex, not another developer playground.
@@ -22,12 +22,16 @@ Demand and real-world usability still need validation with prospective users.
   contained in this repository, with source/build metadata and dependency notices.
   Hosted artifacts and registry publication are not required for v1.
 - Device-local save/resume is included in the first release, by explicit consent.
+- Explicitly approved manual replacements are included in exports even if the
+  original encoding remains unconfirmed. Preserve and report the original findings;
+  export acknowledgement covers these unresolved findings. Confirmed 2026-09-28.
 - Preserve original values; uncertain or mixed encoding must not be silently repaired.
 - Use synthetic test datasets with recorded provenance. Two user-supplied CSVs
   are now available for local troubleshooting only; do not commit or redistribute them.
 - Milestone one was authorized and committed at the user's request as `92d0a98`.
   Milestone two was committed as `eaf8b57` at the user’s request. Milestone three
-  is authorized: local inspection, proposed changes, review queues and approvals.
+  was committed as `e504858`. Milestone four is authorized: reviewed exports,
+  reports, explicit save/resume and portable backups.
   Follow the delivery sequence; reviewed exports and save/resume remain next. No deployment, package publication, push or GitHub settings change is authorized.
 - All product UI copy must be end-user focused. Remove developer status screens,
   raw JSON, build identities and worker terminology from production. Design for a
@@ -177,8 +181,10 @@ acceptance gates. V1 has no API mode selector, server adapter, sign-in, or quota
 ## 6. Exports and traceability
 
 - Export all rows in original order by default, with only explicitly approved cell
-  proposals replacing original values. Rejected/unreviewed/unresolved cells retain
-  originals. Exporting a filtered subset requires an explicit separate selection.
+  proposals replacing original values. Cells without an approved replacement retain
+  originals. Approved manual replacements are included even when original findings
+  remain unresolved; report those findings and require acknowledgement. Exporting
+  a filtered subset requires an explicit separate selection.
 - Show counts of changed, unresolved, failed, and unreviewed cells before export.
   Do not label an export all-Unicode/all-Zawgyi when retained unresolved cells mean
   the requested target was not established throughout the selected columns.
@@ -223,7 +229,7 @@ Acceptance gates:
 
 These implementation defaults make the remaining behavior concrete and remain
 open to revision. Explicit user decisions are recorded separately above. The current
-implementation authorization covers milestones one through three, not the full baseline.
+implementation authorization covers milestones one through four, not the full baseline.
 
 - **Application:** React + TypeScript + Vite, with the proposed shadcn/ui and
   Tailwind approach. Build a static browser application with worker-based local
@@ -477,6 +483,77 @@ next milestone. No new dependency or essential unresolved decision was needed.
 Hosted CI, Firefox/WebKit, screen readers, low-powered device peak-memory profiling,
 and independent linguistic/operator validation remain outstanding.
 
+## Milestone four progress — 2026-09-29
+
+Implemented:
+
+- Reviewed CSV export includes all rows in original order and all columns, with only
+  revision-matched approved proposals replacing originals. Approved manual edits
+  follow the confirmed exception above. Review filters never restrict an export.
+- Export confirmation displays approved-change, unresolved, failed, incomplete and
+  unreviewed counts, and requires acknowledgement when any unresolved or unfinished
+  work remains. Output retains delimiter/header choice and embedded field newlines,
+  quotes every field, uses CRLF record separators, and offers an explicit UTF-8 BOM.
+- Separate data-preserving and spreadsheet-safe modes. `apostrophe-prefix-v1` adds a
+  single apostrophe to values beginning with a tab/CR/LF, or whose first character
+  after leading whitespace is `=`, `+`, `-`, `@` or the corresponding fullwidth form.
+  Headers are checked too. Reports identify every changed row/column position.
+  This intentionally changes values and is not a guarantee across spreadsheet
+  products or re-saving. Original-file download remains byte-identical.
+- Version-one JSON reports include source fingerprint, schema/engine/build identity,
+  selected column IDs, settings, stages, counts, applied IDs/revisions/provenance,
+  unresolved statuses and spreadsheet-escape positions. Cell text is excluded by
+  default; an explicit option includes original/replacement text for applied changes.
+- Explicit browser-local Save/Save changes, saved-project listing, reopen and Delete.
+  IndexedDB version two stores checkpoints and small listing metadata atomically;
+  version-one records migrate without deletion. Newer unsupported database versions
+  are left intact. Storage errors/transaction aborts retain the previous checkpoint.
+- A held Web Lock gives one tab write ownership; additional tabs are read-only.
+  Missing Web Locks means saved projects open read-only. Save/Delete also compare
+  checkpoint revisions atomically, rejecting stale writes. Closing the owning view
+  releases its lock. Saving is never automatic; only unsaved work triggers navigation
+  warnings. Device storage is explicitly described as evictable and not a backup.
+- Version-one portable JSON backups include base64 original bytes, fingerprint,
+  positional identities, selections, settings, results, proposals and decisions.
+  Import preserves dataset identities but uses a fresh storage identity on first
+  Save; it cannot overwrite a saved project by an imported ID. Reopen/import runs
+  no linguistic processing. Restored running cells become cancelled; a new
+  inspection explicitly replaces results and approvals.
+- A dedicated project-file worker prepares exports/backups and validates restore
+  inputs. Validation checks source hash and CSV limits, selected-cell completeness,
+  coordinates/original values, settings/stages, engine metadata, exact diagnostic
+  spans and approval revisions. Objects cannot supply executable behavior; nested
+  prototype keys are rejected. Backups are limited to 96 MiB, nesting to 20 levels,
+  and validation to two million JSON nodes. Export/report outputs also have 96 MiB
+  guards. Each file operation has a 30-second deadline, cancellation and explicit retry.
+- No new dependency, upstream change, API mode, authentication, deployment or push.
+
+Verification completed locally:
+
+- `pnpm check`: generated identity, lint, both TypeScript scopes, 91 tests across
+  eight files, production build, worker boundaries/notices and the isolated offline
+  MyanLex consumer passed.
+- `pnpm test:browser` with the two opt-in supplied CSVs: 30 Chromium tests passed.
+  Both files completed import and selected-column inspection; all exported rows
+  retained original values when no changes were approved, backup source bytes and
+  original downloads matched exactly. User data was not added to fixtures or screenshots.
+- `pnpm verify:clean`: frozen install into an empty store, formatting, the complete
+  check suite and 28 synthetic-fixture Chromium tests passed from a temporary source
+  snapshot without generated files, existing dependencies or the sibling repository.
+- Automated coverage includes explicit save/restore without reprocessing, cross-tab
+  read-only ownership, stale revisions, aborted saves, schema migration, unsupported
+  versions, malformed backups, worker failure/cancellation/timeout and explicit retry.
+  Local processing/export tests guard against processing requests and automatic storage.
+- Desktop and narrow export screenshots were inspected; dialog actions and close
+  controls remain reachable. `pnpm format:check` and `git diff --check` passed.
+
+Native IndexedDB, Web Locks and CSV escaping policy were checked against MDN and
+OWASP documentation. Hosted CI, Firefox/WebKit, assistive-technology verification,
+peak-memory profiling and independent operator validation remain unverified. Browser
+storage and spreadsheet escaping are not claimed to protect against malicious
+software or an untrusted browser profile. No implementation blocker remains for
+this milestone; broader release readiness is still pending.
+
 ## Delivery sequence
 
 1. On a follow-up implementation request, use the confirmed local-only,
@@ -493,5 +570,6 @@ and independent linguistic/operator validation remain outstanding.
    execution after its design gate is resolved.
 
 The user need not purchase a domain, provision hosting, publish packages, or supply
-production credentials. The next milestone is safe reviewed exports, reports, explicit save/resume and
-portable backups, following the confirmed integrity and approval semantics.
+production credentials. The next milestone is release hardening: cross-browser
+accessibility and resource verification, recovery/limits documentation and operator
+validation of the complete import-to-export workflow.

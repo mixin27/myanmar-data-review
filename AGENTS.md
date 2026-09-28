@@ -30,14 +30,20 @@ change GitHub settings without explicit authorization.
 
 ## Scope and verification
 
-Current milestone: local inspection, proposed changes, review queues and approvals.
-CSV import and selection are complete. Saved projects, reviewed exports and reports
-follow next; authentication and API execution remain deferred.
+Current milestone: reviewed CSV exports, reports, explicit save/resume and portable
+backups. Import and review/approval are complete. Authentication and API execution
+remain deferred. Use the next hardening milestone for broader release validation.
 
 Keep processing state separate from review decisions and diagnostic resolution.
 Approvals bind to proposal revisions; settings, content or engine changes invalidate
 them. Bulk approval freezes IDs/revisions and excludes manual or blocked proposals.
 Manual replacement always requires a separate approval and retains original findings.
+Explicitly approved manual replacements are exported even if original findings
+remain unresolved; retain and report those findings. All other cells without an
+approved proposal keep originals. Export every row, regardless of review filters.
+Device storage writes require explicit Save or Delete actions. Never process on
+restore. Backups are untrusted, versioned and bounded; restore as a new unsaved
+project. Preserve transaction atomicity, writer ownership and revision conflict checks.
 Preserve exact analyzed strings for all diagnostic spans. Process every selected
 cell within explicit resource guards, not just the current preview page.
 

@@ -1,3 +1,5 @@
+import { ProjectLibrary } from "./components/ProjectLibrary";
+import type { OpenedProject } from "./components/ProjectLibrary";
 import { useEffect, useRef, useState } from "react";
 import { createCsvSession } from "./csv/browser-client";
 import { CSV_LIMITS, CsvError, columnLabel } from "./csv/contracts";
@@ -20,6 +22,9 @@ const fileSize = (value: number) =>
     : `${(value / 1024 / 1024).toFixed(1)} MB`;
 
 export function App() {
+  const [dirty, setDirty] = useState(false);
+  const [restored, setRestored] = useState<OpenedProject | null>(null);
+  const [projectReadOnly, setProjectReadOnly] = useState(false);
   const [step, setStep] = useState<"file" | "layout" | "columns" | "data">(
     "file",
   );
@@ -57,13 +62,13 @@ export function App() {
     heading.current?.focus();
   }, [step]);
   useEffect(() => {
-    if (!file) return;
+    if (!file || !dirty) return;
     const beforeLeave = (event: BeforeUnloadEvent) => {
       event.preventDefault();
     };
     window.addEventListener("beforeunload", beforeLeave);
     return () => window.removeEventListener("beforeunload", beforeLeave);
-  }, [file]);
+  }, [file, dirty]);
 
   async function open(nextFile: File, nextOptions: CsvOptions, id: string) {
     const current = session.current;
@@ -121,7 +126,10 @@ export function App() {
     }
     const id = crypto.randomUUID();
     fileId.current = id;
+    setRestored(null);
+    setProjectReadOnly(false);
     setReviewStarted(false);
+    setDirty(true);
     setFile(next);
     setOptions(initialOptions);
     setSelected(new Set());
@@ -147,7 +155,10 @@ export function App() {
   function reset() {
     revision.current++;
     session.current?.close();
+    setRestored(null);
+    setProjectReadOnly(false);
     setReviewStarted(false);
+    setDirty(false);
     setFile(null);
     setSummary(null);
     setPage(null);
@@ -224,6 +235,25 @@ export function App() {
       if (version === revision.current) setPaging(false);
     }
   }
+  async function restoreProject(project: OpenedProject) {
+    const { snapshot, file: original } = project;
+    setRestored(null);
+    setProjectReadOnly(!!project.saved);
+    setEditing(false);
+    setDirty(!project.saved);
+    setFile(original);
+    setOptions(snapshot.options);
+    fileId.current = snapshot.datasetId;
+    setSelected(new Set(snapshot.selected));
+    setDraft(new Set(snapshot.selected));
+    setReviewStarted(!!snapshot.review);
+    setStep("layout");
+    await open(original, snapshot.options, snapshot.datasetId);
+    const restoredPage = await session.current!.page(0);
+    setPage(restoredPage);
+    setRestored(project);
+    setStep("data");
+  }
   function downloadOriginal() {
     if (!file) return;
     const url = URL.createObjectURL(file);
@@ -260,6 +290,7 @@ export function App() {
             Myanmar<span className="brand-light"> Data Review</span>
           </span>
         </a>
+        <ProjectLibrary onOpen={restoreProject} hasFile={!!file} />
         <span className="privacy-badge">
           <Icon name="lock" size={15} />
           Only on your device
@@ -672,7 +703,7 @@ export function App() {
               </div>
               <button
                 className="text-button"
-                disabled={paging}
+                disabled={paging || projectReadOnly}
                 onClick={() => {
                   if (
                     reviewStarted &&
@@ -681,6 +712,7 @@ export function App() {
                     )
                   )
                     return;
+                  setRestored(null);
                   setReviewStarted(false);
                   setDraft(new Set(selected));
                   setSearch("");
@@ -699,6 +731,9 @@ export function App() {
                 summary={summary}
                 selected={selected}
                 onReviewStarted={() => setReviewStarted(true)}
+                restored={restored}
+                onProjectReadOnly={setProjectReadOnly}
+                onDirty={setDirty}
               />
             )}
             <div className="surface data-surface">
@@ -748,8 +783,8 @@ export function App() {
             </div>
             <p className="unsaved-note">
               <Icon name="lock" size={15} />
-              This file is open in this tab only. Keep your original file before
-              closing.
+              Save changes explicitly to keep your progress. Download a backup
+              before clearing browser data.
             </p>
           </section>
         )}

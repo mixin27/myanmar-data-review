@@ -1,3 +1,5 @@
+import { ProjectActions } from "./ProjectActions";
+import type { OpenedProject } from "./ProjectLibrary";
 import { useEffect, useRef, useState } from "react";
 import { createCsvSession } from "../csv/browser-client";
 import type { CsvOptions, CsvSummary } from "../csv/contracts";
@@ -40,17 +42,37 @@ export function ReviewPanel({
   summary,
   selected,
   onReviewStarted,
+  restored,
+  onProjectReadOnly,
+  onDirty,
 }: {
   file: File;
   options: CsvOptions;
   summary: CsvSummary;
   selected: ReadonlySet<string>;
   onReviewStarted: () => void;
+  restored: OpenedProject | null;
+  onProjectReadOnly: (value: boolean) => void;
+  onDirty: (value: boolean) => void;
 }) {
-  const [model, setModel] = useState<ReviewModel | null>(null);
-  const [, redraw] = useState(0);
-  const [settings, setSettings] = useState<Settings>(inspectionSettings);
-  const [inspected, setInspected] = useState(false);
+  const [model, setModel] = useState<ReviewModel | null>(() =>
+    restored?.snapshot.review
+      ? ReviewModel.restore(
+          restored.snapshot.review.cells,
+          restored.snapshot.review.settings,
+          restored.snapshot.review.engineIdentity,
+        )
+      : null,
+  );
+  const [changeVersion, redraw] = useState(0);
+  const [readOnly, setReadOnly] = useState(!!restored?.saved);
+  const [ioBusy, setIoBusy] = useState(false);
+  const [settings, setSettings] = useState<Settings>(
+    restored?.snapshot.review?.settings ?? inspectionSettings,
+  );
+  const [inspected, setInspected] = useState(
+    restored?.snapshot.review?.inspected ?? false,
+  );
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -66,7 +88,7 @@ export function ReviewPanel({
   const runner = useRef<ReviewRunner | null>(null);
   const importer = useRef<ReturnType<typeof createCsvSession> | null>(null);
   const revision = useRef(0);
-  const modelRef = useRef<ReviewModel | null>(null);
+  const modelRef = useRef<ReviewModel | null>(model);
   const detailDialog = useRef<HTMLDialogElement>(null);
   const bulkDialog = useRef<HTMLDialogElement>(null);
   const restartDialog = useRef<HTMLDialogElement>(null);
@@ -86,9 +108,11 @@ export function ReviewPanel({
     (cell) => cell.processing === "succeeded" || cell.processing === "failed",
   ).length;
   const active = activeId && model ? model.get(activeId) : null;
-  const canBulk = !busy && visible.some(eligible);
+  const canBulk = !busy && !readOnly && !ioBusy && visible.some(eligible);
   function report(action: () => void) {
     try {
+      if (readOnly || ioBusy)
+        throw new Error("This project is currently read-only.");
       action();
       setError("");
       refresh();
@@ -101,6 +125,7 @@ export function ReviewPanel({
     }
   }
   async function run(nextSettings = settings) {
+    if (readOnly || ioBusy) return;
     onReviewStarted();
     const current = ++revision.current;
     setBusy(true);
@@ -168,6 +193,7 @@ export function ReviewPanel({
     refresh();
   }
   function requestChange(next: Settings, start: boolean) {
+    if (readOnly || ioBusy) return;
     if (
       model &&
       cells.some(
@@ -189,6 +215,40 @@ export function ReviewPanel({
   }
   return (
     <section className="review-workspace" aria-labelledby="review-title">
+      <ProjectActions
+        rows={summary.rowCount}
+        working={busy}
+        version={changeVersion}
+        savedProject={restored?.saved ?? null}
+        onReadOnly={(value) => {
+          setReadOnly(value);
+          onProjectReadOnly(value);
+        }}
+        onBusy={setIoBusy}
+        onDirty={onDirty}
+        input={() => ({
+          file,
+          datasetId: summary.id,
+          fingerprint: summary.fingerprint,
+          options,
+          selected: [...selected],
+          review: model
+            ? {
+                cells: model.all(),
+                settings: model.settings,
+                engineIdentity: model.engineIdentity,
+                inspected,
+              }
+            : null,
+        })}
+      />
+      {restored && (
+        <p className="review-scope">
+          Saved findings restored without running inspection. Start a new
+          inspection explicitly to replace the restored findings and approvals.
+        </p>
+      )}
+
       <div className="review-intro">
         <div>
           <span className="eyebrow">Review selected text</span>
@@ -208,7 +268,7 @@ export function ReviewPanel({
           <p>Every row in your chosen columns is included.</p>
         </div>
         {inspected && (
-          <fieldset disabled={busy}>
+          <fieldset disabled={busy || readOnly || ioBusy}>
             <legend>Optional changes</legend>
             <label>
               <input
@@ -245,7 +305,7 @@ export function ReviewPanel({
         <div className="review-run-actions">
           <button
             className="button primary"
-            disabled={busy}
+            disabled={busy || readOnly || ioBusy}
             onClick={() => requestChange(settings, true)}
           >
             {busy
@@ -591,31 +651,34 @@ export function ReviewPanel({
             )}
             <details className="manual-edit">
               <summary>Write a replacement</summary>
-              <p>
-                Create a proposal, then approve it separately. Existing findings
-                remain visible; manual text is not automatically verified.
-              </p>
-              <label htmlFor="manual-value">Replacement text</label>
-              <textarea
-                id="manual-value"
-                value={manual}
-                maxLength={100000}
-                onChange={(event) => setManual(event.target.value)}
-                rows={4}
-              />
-              <button
-                className="button secondary"
-                onClick={() =>
-                  report(() => {
-                    model!.manual(active.id, manual);
-                    setMessage(
-                      "Replacement proposed. Approve it separately when you are ready.",
-                    );
-                  })
-                }
-              >
-                Propose replacement
-              </button>
+              <fieldset disabled={readOnly || ioBusy}>
+                <p>
+                  Create a proposal, then approve it separately. Existing
+                  findings remain visible; manual text is not automatically
+                  verified.
+                </p>
+                <label htmlFor="manual-value">Replacement text</label>
+                <textarea
+                  id="manual-value"
+                  value={manual}
+                  maxLength={100000}
+                  onChange={(event) => setManual(event.target.value)}
+                  rows={4}
+                />
+                <button
+                  className="button secondary"
+                  onClick={() =>
+                    report(() => {
+                      model!.manual(active.id, manual);
+                      setMessage(
+                        "Replacement proposed. Approve it separately when you are ready.",
+                      );
+                    })
+                  }
+                >
+                  Propose replacement
+                </button>
+              </fieldset>
             </details>
             {unresolved(active) && (
               <p className="review-scope">
@@ -624,7 +687,7 @@ export function ReviewPanel({
                 original findings.
               </p>
             )}
-            <div className="cell-actions">
+            <fieldset className="cell-actions" disabled={readOnly || ioBusy}>
               <button
                 className="button secondary"
                 onClick={() =>
@@ -665,7 +728,7 @@ export function ReviewPanel({
               >
                 Approve change
               </button>
-            </div>
+            </fieldset>
           </>
         )}
       </dialog>

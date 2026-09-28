@@ -5,6 +5,11 @@ const output = resolve(process.argv[2] ?? "dist");
 const integration = process.argv[2] === ".test-build";
 const assets = join(output, "assets");
 const files = readdirSync(assets);
+assert.equal(
+  files.filter((file) => /^project\.worker-.*\.js$/.test(file)).length,
+  1,
+  "Expected the project export/backup worker",
+);
 const csvWorkers = files.filter((file) => /^import\.worker-.*\.js$/.test(file));
 assert.equal(csvWorkers.length, 1, "Expected a dedicated CSV worker chunk");
 const languageWorkers = files.filter((file) =>
@@ -16,7 +21,10 @@ assert.equal(
   "Expected the dedicated local language worker",
 );
 for (const file of files.filter(
-  (file) => file.endsWith(".js") && !languageWorkers.includes(file),
+  (file) =>
+    file.endsWith(".js") &&
+    !languageWorkers.includes(file) &&
+    !/^project\.worker-/.test(file),
 )) {
   const source = readFileSync(join(assets, file), "utf8");
   assert.ok(

@@ -99,6 +99,27 @@ export class ReviewModel {
       });
     }
   }
+  static restore(
+    cells: readonly ReviewCell[],
+    settings: Settings,
+    engineIdentity: string,
+  ): ReviewModel {
+    const model = new ReviewModel(cells);
+    model.settings = { ...settings };
+    model.engineIdentity = engineIdentity;
+    for (const cell of cells) {
+      model.cells.set(cell.id, {
+        ...cell,
+        processing:
+          cell.processing === "running" ? "cancelled" : cell.processing,
+      });
+      model.proposalRevision = Math.max(
+        model.proposalRevision,
+        cell.proposal?.revision ?? 0,
+      );
+    }
+    return model;
+  }
   all(): ReviewCell[] {
     return [...this.cells.values()];
   }

@@ -17,5 +17,9 @@
     "types": ["vite/client", "node"]
   },
   "include": ["src", "tests", "vite.config.ts", "playwright.config.ts"],
-  "exclude": ["src/processing/engine.worker.ts", "src/csv/import.worker.ts"]
+  "exclude": [
+    "src/processing/engine.worker.ts",
+    "src/csv/import.worker.ts",
+    "src/project/project.worker.ts"
+  ]
 }

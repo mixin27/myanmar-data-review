@@ -23,7 +23,33 @@ export default defineConfig(({ mode }) => ({
       },
     },
   ],
-  worker: { format: "es" },
+  worker: {
+    format: "es",
+    plugins: () => [
+      {
+        name: "keep-project-worker-free-of-linguistic-runtime",
+        generateBundle(_options, bundle) {
+          const chunks = Object.values(bundle).filter(
+            (output) => output.type === "chunk",
+          );
+          if (
+            !chunks.some((chunk) =>
+              chunk.facadeModuleId?.endsWith("/project/project.worker.ts"),
+            )
+          )
+            return;
+          for (const chunk of chunks)
+            for (const id of Object.keys(chunk.modules)) {
+              if (/node_modules\/@myanlex\/(application|core)\//.test(id))
+                this.error(
+                  "Project files worker must not run linguistic services: " +
+                    id,
+                );
+            }
+        },
+      },
+    ],
+  },
   build: {
     outDir: mode === "integration" ? ".test-build" : "dist",
     manifest: true,

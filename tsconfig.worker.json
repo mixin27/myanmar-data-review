@@ -4,6 +4,10 @@
     "lib": ["ES2022", "WebWorker"],
     "types": []
   },
-  "include": ["src/processing/engine.worker.ts", "src/csv/import.worker.ts"],
+  "include": [
+    "src/processing/engine.worker.ts",
+    "src/csv/import.worker.ts",
+    "src/project/project.worker.ts"
+  ],
   "exclude": []
 }

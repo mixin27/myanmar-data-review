@@ -21,3 +21,7 @@ customer fields, quotes, line breaks, emoji, markup and formula-like strings) ar
 project-authored transport examples, with no claimed linguistic expected results.
 Large datasets are generated at runtime. Supplied user CSVs are opt-in local test
 inputs only and are not copied into this repository or screenshots.
+
+Export, backup and saved-project tests use project-authored transport values and
+the licensed integration examples above. Generated checkpoints exercise storage
+and recovery contracts; they do not add linguistic ground truth or user data.

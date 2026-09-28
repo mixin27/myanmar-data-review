@@ -9,8 +9,8 @@ The interface now follows a three-step import flow. Engineering test screens,
 raw diagnostics and build identities are excluded from the product build.
 “File ready for review” means import is complete; it does not mean that language
 inspection or conversion has run. Choose Inspect selected text to see findings.
-Reviewed exports and explicit save/resume are the next milestone in
-[PRODUCT_PLAN.md](PRODUCT_PLAN.md).
+Reviewed CSV exports, reports, explicit local saving and portable backups are now
+available. Release hardening is next in [PRODUCT_PLAN.md](PRODUCT_PLAN.md).
 
 ## Run
 
@@ -22,8 +22,7 @@ pnpm dev
 ```
 
 Open the local URL printed by Vite. No environment files, credentials, MyanLex
-checkout, authentication or processing API are needed. Text stays in memory and
-is not saved automatically. Download original returns the exact source bytes;
+checkout, authentication or processing API are needed. Text stays in memory unless you explicitly choose Save project or Save changes. Download original returns the exact source bytes;
 it is not a reviewed-data export.
 
 ## Current scope
@@ -49,7 +48,7 @@ Review accepts up to 10,000 selected cells, with a cumulative 16,000,000-code-un
 serialized-result guard. Select fewer columns or split files if needed. A result
 budget or worker failure stops processing explicitly, retaining completed findings
 and marking remaining cells uninspected. The 30-second processing timeout applies
-to each cell, not the whole dataset. Reviews and approvals remain in memory only.
+to each cell, not the whole dataset. Reviews and approvals remain in memory until an explicit Save action.
 
 Inspect first. Then enable Propose Unicode conversion or Normalize Unicode (NFC)
 if desired and run inspection again. Starting a new review clears previous findings,
@@ -57,6 +56,36 @@ proposals and approvals after confirmation. Use the review queues and individual
 cell view to approve changes, keep originals, or propose manual replacements.
 Unresolved findings remain visible after manual decisions. Download original always
 returns the unmodified input, including after approval.
+
+## Export, save and restore
+
+- **Export reviewed CSV** includes every row in original order. Only approved
+  proposals replace originals. This includes approved manual replacements even
+  when original findings remain unresolved; those findings stay in the report.
+- Review the counts and acknowledge unfinished/unresolved work. Choose data-value
+  preservation or explicit spreadsheet escaping, and an optional UTF-8 BOM.
+  Escaping prefixes an apostrophe before formula-like values (including after
+  whitespace), leading tabs/newlines, and their fullwidth formula variants. Headers
+  are included. It changes values and cannot guarantee behavior in every spreadsheet
+  app or after re-saving; the report lists every affected row and column.
+- **Download report** is separate from CSV download. Reports contain metadata and
+  cell IDs/revisions by default. Including applied original/replacement text is opt-in.
+- **Save project** confirms storage of the complete checkpoint in this browser.
+  Later changes require **Save changes**. Storage is not cloud sync or a backup and
+  is accessible to others using the same browser profile. Browser clearing/eviction
+  may remove it. **Delete saved project** removes that record, not downloaded copies.
+- **Projects & backups → Show saved projects** lists local checkpoints. Opening one
+  restores its review without inspection. A second tab opens read-only; close the
+  owning tab and reopen to edit. Web Locks is required for writing saved projects.
+- **Download backup** creates a complete portable JSON file without saving locally.
+  **Open backup** validates it and opens a new unsaved project. It does not overwrite
+  another project. A new inspection is always explicit and clears old approvals.
+
+Backups and export/report outputs are limited to 96 MiB. Restore checks depth (20),
+JSON node count (two million), file fingerprint, CSV limits, identities, evidence
+spans, stage consistency and approval revisions. Project-file work happens in a
+separate worker with a 30-second deadline and cancellation. Checkpoints are user
+records, not signed/authenticated proof of linguistic correctness.
 
 ## Verify
 
@@ -88,7 +117,8 @@ typechecking; hosted CI has not run because nothing has been pushed.
 
 Optional local supplied-file reproduction: set `MDR_LOCAL_CSV_FILES` to a JSON
 array of absolute CSV paths, then run `pnpm test:browser`. Those files are used
-locally for import/selected-column inspection/download checks, never committed or included in screenshots.
+locally for import, selected-column inspection, all-row export, backup and original
+download checks; never committed or included in screenshots.
 Without that environment variable the tests use only provenance-recorded synthetic
 fixtures. Fixture content is data, never instructions.
 
@@ -110,7 +140,11 @@ bulk approvals independently of React. The runner collects selected strings via
 bounded CSV pages and processes them sequentially through `src/processing/`.
 The dedicated worker calls public `@myanlex/application` services; no linguistic
 algorithms were copied. Results remain in memory, distinct from immutable sources.
-Tests exercise both the product flow and a test-only parity harness. See
+Tests exercise both the product flow and a test-only parity harness.
+`src/project/` owns file generation/validation and explicit storage. IndexedDB
+checkpoints and listing metadata commit atomically; version-one databases migrate
+to version two without dropping projects. Writer locks and revision comparisons
+prevent stale tabs from overwriting a checkpoint. See
 [AGENTS.md](AGENTS.md).
 
 [The artifact manifest and recipe](vendor/myanlex/README.md) pin upstream commit
@@ -141,3 +175,8 @@ Chromium desktop and narrow-width layouts are tested on macOS ARM64. Firefox,
 WebKit/Safari, mobile browser engines, screen readers, lower-powered-device peak
 memory and hosted Ubuntu CI remain unverified. Synthetic transport tests and engine
 parity do not establish linguistic accuracy.
+
+Milestone-four references: [IndexedDB transactions and version changes](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB),
+[Web Locks](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API), and
+[OWASP CSV injection guidance](https://community.owasp.org/attacks/CSV_Injection).
+No new dependency was added for export, storage or backups.
