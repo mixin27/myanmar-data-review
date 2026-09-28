@@ -1,4 +1,4 @@
-name: Verify milestone one
+name: Verify local review workflow
 on:
   push:
   pull_request:
@@ -28,5 +28,5 @@ jobs:
       - run: pnpm build
       - name: Install archives in an offline isolated consumer with an empty store
         run: pnpm test:consumer
-      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:browser

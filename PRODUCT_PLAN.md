@@ -1,8 +1,7 @@
 # Myanmar Data Review — product and implementation plan
 
-Status: milestones one through three committed. Milestone four (exports, reports,
-explicit save/resume and portable backups) implemented and locally verified; uncommitted.
-Hosted CI and broader browser/accessibility verification remain pending.
+Status: milestones one through four committed. Release hardening is in progress.
+Hosted CI and independent operator/accessibility verification remain pending.
 
 This is a standalone product consuming MyanLex, not another developer playground.
 Its purpose is to help one operator review legacy Myanmar text in CSV records,
@@ -30,9 +29,9 @@ Demand and real-world usability still need validation with prospective users.
   are now available for local troubleshooting only; do not commit or redistribute them.
 - Milestone one was authorized and committed at the user's request as `92d0a98`.
   Milestone two was committed as `eaf8b57` at the user’s request. Milestone three
-  was committed as `e504858`. Milestone four is authorized: reviewed exports,
-  reports, explicit save/resume and portable backups.
-  Follow the delivery sequence; reviewed exports and save/resume remain next. No deployment, package publication, push or GitHub settings change is authorized.
+  was committed as `e504858`. Milestone four was committed as `4072a8a`.
+  Release hardening is now authorized. No deployment, package publication, push
+  or GitHub settings change is authorized.
 - All product UI copy must be end-user focused. Remove developer status screens,
   raw JSON, build identities and worker terminology from production. Design for a
   coherent workflow with a clear hierarchy and next action; simplicity alone is
@@ -229,7 +228,7 @@ Acceptance gates:
 
 These implementation defaults make the remaining behavior concrete and remain
 open to revision. Explicit user decisions are recorded separately above. The current
-implementation authorization covers milestones one through four, not the full baseline.
+implementation authorization covers milestones one through five, not the deferred API release.
 
 - **Application:** React + TypeScript + Vite, with the proposed shadcn/ui and
   Tailwind approach. Build a static browser application with worker-based local
@@ -553,6 +552,44 @@ peak-memory profiling and independent operator validation remain unverified. Bro
 storage and spreadsheet escaping are not claimed to protect against malicious
 software or an untrusted browser profile. No implementation blocker remains for
 this milestone; broader release readiness is still pending.
+
+## Milestone five progress — 2026-09-29
+
+Release hardening started; not yet release-complete:
+
+- Committed milestone four as `4072a8a` at the user's request. This hardening checkpoint
+  is recorded for commit at the user’s request; no push or deployment.
+- The same browser suite now targets Chromium, Firefox and WebKit. CI installs all
+  three pinned browser engines; the workflow name now describes the full product.
+- Added keyboard tests for named modal dialogs, background focus exclusion, Escape
+  dismissal, focus return and narrow-layout overflow. Native browser chrome remains
+  reachable. This is not a screen-reader audit.
+- Corrected request assertions for WebKit: it categorizes worker-script and local
+  Blob loads as fetch. Exact worker asset/local Blob allowances retain the guards
+  that reject application fetch/XHR/WebSocket calls and automatic persistence.
+- `pnpm check` passed (91 tests, generated identity, lint, typecheck, production
+  build and isolated MyanLex consumer). Final lint/typecheck/format checks passed.
+- Cross-browser run: 30 Chromium and 30 WebKit tests passed. All 30 Firefox tests
+  were blocked before app startup by “Could not find profile folder.” Installing
+  the pinned Firefox binary and using canonical `/private/tmp` did not resolve it.
+  Firefox stays enabled in the default suite and CI; the aggregate command fails
+  visibly until its launch issue is resolved. Hosted CI has not run. The clean-source
+  verification from milestone four predates this expanded browser matrix; a new
+  all-browser clean run is not claimed.
+- Added `pnpm benchmark:browser`: 100 ms process-tree RSS sampling for synthetic
+  50,000-row import and 10,000-cell inspection. On this macOS ARM64 run they took
+  640 ms and 1,428 ms respectively; 40 samples reported 1,112 MiB maximum summed
+  RSS including runner/browser children and shared pages. It can miss short peaks
+  and is not an app-only peak or a capacity guarantee. Existing Node import profiles
+  took 73/102/407 ms with heap deltas 16.5/17.4/59.8 MiB; these are not browser peaks.
+- Added `docs/RELEASE_VALIDATION.md` with recovery steps, storage-origin limits,
+  resource boundaries and a concrete operator/assistive-technology validation guide.
+  No runtime dependencies, application behavior or linguistic policy changed.
+
+Remaining gates: resolve Firefox launch and rerun its suite, hosted Ubuntu CI after
+an authorized push, shipping Safari/iOS and physical low-memory devices, precise
+worker-inclusive peak-memory profiling, screen-reader checks and independent operator
+and linguistic validation. These have not been replaced by synthetic test results.
 
 ## Delivery sequence
 

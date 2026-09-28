@@ -171,7 +171,11 @@ test("local import does not upload or persist data and reload starts fresh", asy
   const requests: string[] = [];
   context.on("request", (request) => {
     if (
-      ["fetch", "xhr", "websocket"].includes(request.resourceType()) ||
+      (["fetch", "xhr", "websocket"].includes(request.resourceType()) &&
+        !/^http:\/\/127\.0\.0\.1:4173\/assets\/import\.worker-[\w-]+\.js$/.test(
+          request.url(),
+        ) &&
+        !request.url().startsWith("blob:http://127.0.0.1:4173/")) ||
       request.method() !== "GET"
     )
       requests.push(request.url());
@@ -238,7 +242,7 @@ test("large imports keep the table bounded and preserve values between pages", a
     page.getByRole("cell", { name: "0000000", exact: true }),
   ).toBeVisible();
   console.log(
-    `Chromium 50,000-row import and pagination: ${Math.round(performance.now() - start)} ms`,
+    `Browser 50,000-row import and pagination: ${Math.round(performance.now() - start)} ms`,
   );
 });
 

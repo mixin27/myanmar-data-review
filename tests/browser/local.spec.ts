@@ -95,9 +95,10 @@ test("production worker matches pinned services and does not upload or persist t
   for (const request of network.slice(initialCount)) {
     expect(request.method).toBe("GET");
     expect(request.url).toMatch(
-      /^http:\/\/127\.0\.0\.1:4173\/assets\/engine\.worker-[\w-]+\.js$/,
+      /^(http:\/\/127\.0\.0\.1:4173\/assets\/engine\.worker-[\w-]+\.js|blob:http:\/\/127\.0\.0\.1:4173\/[\w-]+)$/,
     );
-    expect(["fetch", "xhr", "websocket"]).not.toContain(request.type);
+    // WebKit labels worker-script and local Blob loads as fetch. Realm guards
+    // above reject actual fetch/XHR calls; the URL allowlist permits assets only.
   }
   expect(
     await page.evaluate(() => ({

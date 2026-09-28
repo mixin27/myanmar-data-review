@@ -30,9 +30,9 @@ change GitHub settings without explicit authorization.
 
 ## Scope and verification
 
-Current milestone: reviewed CSV exports, reports, explicit save/resume and portable
-backups. Import and review/approval are complete. Authentication and API execution
-remain deferred. Use the next hardening milestone for broader release validation.
+Current milestone: release hardening, including cross-browser tests, accessibility,
+resource measurements and recovery documentation. Import, review, exports and
+explicit save/resume are complete. Authentication and API execution remain deferred.
 
 Keep processing state separate from review decisions and diagnostic resolution.
 Approvals bind to proposal revisions; settings, content or engine changes invalidate

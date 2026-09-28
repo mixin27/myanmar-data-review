@@ -104,10 +104,10 @@ consumer with an empty store. Node filesystem permissions restrict that consumer
 to its temporary directory and exclude the sibling source repository.
 
 `pnpm test:browser` builds a separate `.test-build` containing the real product and
-an isolated language-worker test harness. It runs headless Chromium against that
+an isolated language-worker test harness. It runs headless Chromium, Firefox and WebKit against that
 build and verifies that the production build has no test routes or developer copy.
 Playwright starts/stops port 4173. Linux needs
-`pnpm exec playwright install --with-deps chromium`.
+`pnpm exec playwright install --with-deps chromium firefox webkit`.
 
 `pnpm verify:clean` copies Git-visible source (including uncommitted files) to a
 temporary directory, installs the frozen lockfile into an empty store, then runs
@@ -171,10 +171,18 @@ parser that needs a second quote-validation layer. It is covered by generated
 round-trip and arbitrary chunk-boundary tests. No dependencies were added for
 milestone two. Native controls and semantic tables support the tailored interface.
 
-Chromium desktop and narrow-width layouts are tested on macOS ARM64. Firefox,
-WebKit/Safari, mobile browser engines, screen readers, lower-powered-device peak
-memory and hosted Ubuntu CI remain unverified. Synthetic transport tests and engine
-parity do not establish linguistic accuracy.
+Chromium and WebKit desktop/narrow workflows are tested on macOS ARM64. Firefox
+verification is blocked locally: its installed browser exits before launch with
+“Could not find profile folder,” including when using `/private/tmp`. The full suite
+keeps Firefox enabled so this failure remains visible. To run the available engines:
+`pnpm test:browser --project=chromium --project=webkit`.
+Shipping Safari/iOS, screen readers, lower-powered devices and hosted Ubuntu CI
+remain unverified. Synthetic tests and engine parity do not establish linguistic accuracy.
+
+See [release validation and recovery](docs/RELEASE_VALIDATION.md) for recovery steps,
+operator tasks and outstanding release gates. `pnpm benchmark:browser` samples the
+Chromium test process tree's memory on macOS/Linux; this includes test tooling and
+shared pages and is not a precise application peak or a device capacity guarantee.
 
 Milestone-four references: [IndexedDB transactions and version changes](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB),
 [Web Locks](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API), and

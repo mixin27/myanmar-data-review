@@ -199,7 +199,8 @@ test("all selected rows are processed beyond preview and local work makes no upl
   page.on("request", (request) => {
     if (
       request.method() !== "GET" ||
-      !request.url().startsWith("http://127.0.0.1:4173/")
+      (!request.url().startsWith("http://127.0.0.1:4173/") &&
+        !request.url().startsWith("blob:http://127.0.0.1:4173/"))
     )
       requests.push(request.url());
   });
@@ -253,7 +254,7 @@ test("10,000 selected cells finish without limiting results to the preview", asy
   await expect(
     page.getByText("Inspection complete.", { exact: false }),
   ).toBeVisible({ timeout: 45000 });
-  console.log(`Chromium 10,000-cell review: ${Date.now() - start} ms`);
+  console.log(`Browser 10,000-cell review: ${Date.now() - start} ms`);
   await expect(
     page.getByText("10,000 of 10,000 cells inspected"),
   ).toBeVisible();

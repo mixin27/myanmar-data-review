@@ -6,7 +6,11 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   use: { baseURL: "http://127.0.0.1:4173", trace: "off" },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+  ],
   webServer: {
     command: "pnpm preview --outDir .test-build --port 4173 --strictPort",
     url: "http://127.0.0.1:4173",

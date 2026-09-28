@@ -24,7 +24,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify:clean": "node scripts/verify-clean.mjs",
-    "build:integration": "pnpm generate && vite build --mode integration && node scripts/verify-bundle.mjs .test-build"
+    "build:integration": "pnpm generate && vite build --mode integration && node scripts/verify-bundle.mjs .test-build",
+    "benchmark:browser": "pnpm build:integration && node scripts/benchmark-browser.mjs"
   },
   "dependencies": {
     "react": "19.3.0",
