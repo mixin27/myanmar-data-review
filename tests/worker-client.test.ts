@@ -159,3 +159,58 @@ describe("worker lifecycle", () => {
     await malformed;
   });
 });
+
+describe("dataset worker reuse", () => {
+  it("reuses one worker for completed cells, rejects stale messages and terminates at review end", async () => {
+    const worker = new FakeWorker();
+    const factory = vi.fn(() => worker);
+    const client = new LocalWorkerClient(factory, 100, true);
+    const first = client.execute(input, 1);
+    worker.respond();
+    await first;
+    expect(worker.terminate).not.toHaveBeenCalled();
+    const second = client.execute({ ...input, text: "next" }, 1);
+    worker.respond(); // the earlier request ID must not resolve the next cell
+    const settled = vi.fn();
+    void second.then(settled);
+    await Promise.resolve();
+    expect(settled).not.toHaveBeenCalled();
+    const request = worker.postMessage.mock.calls[1]![0];
+    worker.onmessage?.(
+      new MessageEvent("message", {
+        data: { ...request, ok: true, result: executeLocal(request.input) },
+      }),
+    );
+    await second;
+    expect(factory).toHaveBeenCalledOnce();
+    client.cancel();
+    expect(worker.terminate).toHaveBeenCalledOnce();
+  });
+  it("terminates a reused worker on timeout and starts fresh on explicit retry", async () => {
+    vi.useFakeTimers();
+    const workers: FakeWorker[] = [];
+    const client = new LocalWorkerClient(
+      () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      100,
+      true,
+    );
+    const first = client.execute(input, 1);
+    workers[0]!.respond();
+    await first;
+    const pending = expect(client.execute(input, 1)).rejects.toMatchObject({
+      code: "timeout",
+    });
+    await vi.advanceTimersByTimeAsync(101);
+    await pending;
+    expect(workers[0]!.terminate).toHaveBeenCalledOnce();
+    const retry = client.execute(input, 2);
+    workers[1]!.respond();
+    await retry;
+    client.cancel();
+    expect(workers[1]!.terminate).toHaveBeenCalledOnce();
+  });
+});

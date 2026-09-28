@@ -20,6 +20,7 @@ export interface ProcessingResult {
   readonly conversion: MyanmarEncodingConversionResult | null;
   readonly normalization: NormalizationResult | null;
   readonly validation: BurmeseOrthographyValidationResult | null;
+  readonly originalValidation: BurmeseOrthographyValidationResult | null;
   readonly unresolvedReason:
     "encoding_mixed" | "encoding_uncertain" | "conversion_required" | null;
   readonly engine: typeof engineBuild;

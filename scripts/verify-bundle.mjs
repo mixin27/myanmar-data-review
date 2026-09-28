@@ -12,8 +12,8 @@ const languageWorkers = files.filter((file) =>
 );
 assert.equal(
   languageWorkers.length,
-  integration ? 1 : 0,
-  "Language worker belongs to the integration harness until dataset review ships",
+  1,
+  "Expected the dedicated local language worker",
 );
 for (const file of files.filter(
   (file) => file.endsWith(".js") && !languageWorkers.includes(file),

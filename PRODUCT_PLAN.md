@@ -1,7 +1,8 @@
 # Myanmar Data Review — product and implementation plan
 
-Status: milestone one committed; milestone two (CSV import and selection) implemented
-and locally verified. Inspection, proposals and approvals remain the next milestone. Hosted CI and broader browser verification remain pending.
+Status: milestones one and two committed. Milestone three (local inspection,
+proposals, review queues and approvals) implemented and locally verified.
+Hosted CI and broader browser/accessibility verification remain pending.
 
 This is a standalone product consuming MyanLex, not another developer playground.
 Its purpose is to help one operator review legacy Myanmar text in CSV records,
@@ -25,9 +26,9 @@ Demand and real-world usability still need validation with prospective users.
 - Use synthetic test datasets with recorded provenance. Two user-supplied CSVs
   are now available for local troubleshooting only; do not commit or redistribute them.
 - Milestone one was authorized and committed at the user's request as `92d0a98`.
-  Milestone two is authorized: CSV import, original-data preview and column selection.
-  Follow the delivery sequence; do not expand it based on ambiguous “no changes”
-  feedback. No deployment, package publication, push or GitHub settings change is authorized.
+  Milestone two was committed as `eaf8b57` at the user’s request. Milestone three
+  is authorized: local inspection, proposed changes, review queues and approvals.
+  Follow the delivery sequence; reviewed exports and save/resume remain next. No deployment, package publication, push or GitHub settings change is authorized.
 - All product UI copy must be end-user focused. Remove developer status screens,
   raw JSON, build identities and worker terminology from production. Design for a
   coherent workflow with a clear hierarchy and next action; simplicity alone is
@@ -222,7 +223,7 @@ Acceptance gates:
 
 These implementation defaults make the remaining behavior concrete and remain
 open to revision. Explicit user decisions are recorded separately above. The current
-implementation authorization covers milestones one and two, not the full baseline.
+implementation authorization covers milestones one through three, not the full baseline.
 
 - **Application:** React + TypeScript + Vite, with the proposed shadcn/ui and
   Tailwind approach. Build a static browser application with worker-based local
@@ -390,7 +391,7 @@ Measurements and verification:
   checks. The supplied files imported 611 and 508 data rows respectively; original
   downloads matched their source bytes exactly. Source contents are not committed.
 - Desktop and narrow screenshots made from synthetic data were visually reviewed.
-  Milestone two changes remain uncommitted; milestone one is committed as above.
+  Milestone two was subsequently committed as `eaf8b57` at the user’s request.
 
 Still outside this milestone: language findings in the product, conversion
 proposals, cell/bulk approval, save/resume and reviewed exports. The next milestone
@@ -398,6 +399,83 @@ must provide these review semantics together rather than treating import status 
 an analysis result. Paged previews must not become a limit on eventual processing
 or export completeness. Hosted Ubuntu CI, Firefox/WebKit, screen-reader testing,
 and peak-memory measurements on lower-powered devices remain unverified.
+
+## Milestone three progress — 2026-09-28
+
+Implemented:
+
+- Inspection of every selected cell, independently of the paged preview. Optional
+  guarded Unicode conversion and NFC remain off until an initial inspection ends.
+  Original and proposed values appear side by side in the review table and cell view.
+- Separate processing status, original encoding/structural evidence, proposal,
+  provenance, decision and approval revision. Mixed/uncertain text and structural
+  findings stay unresolved; keeping originals or approving manual replacements
+  does not erase those findings or claim verified linguistic correctness.
+- Needs-attention, proposed-change, approved, kept-original and all-cell queues,
+  bounded to 25 displayed cells. Cell evidence uses exact analyzed strings with
+  code-point spans, including supplementary characters. At most 100 evidence
+  segments/diagnostics are displayed per detail group, explicitly labelled when
+  bounded; complete evidence remains retained for later reporting.
+- Manual replacements create proposals with separate approval. Bulk approval
+  confirms a frozen set of eligible automatic proposal IDs and revisions; stale
+  snapshots fail atomically. Decisions can be revoked. Settings changes and new
+  inspections explicitly clear previous proposals/approvals; changing columns
+  warns before discarding the current review.
+- A single dedicated language worker is reused sequentially within one review.
+  It is terminated on stop, timeout, worker failure or completion. Each cell keeps
+  request/revision checks and a 30-second deadline. A failed worker stops the run
+  without retry; completed findings survive, the failed cell remains failed and
+  remaining cells are marked cancelled. A new review explicitly retries originals.
+- MyanLex continues through unchanged pinned public package artifacts. The product
+  adapter now retains original structural validation separately from output
+  validation. No linguistic algorithm, package identity or upstream source changed.
+- Current review guards: 10,000 selected cells and 16,000,000 serialized result
+  UTF-16 code units (roughly 32 MB of string payload, not a heap-size guarantee).
+  The cell count is checked before collecting review values. Result-budget exhaustion
+  stops with explicit partial status, preserving completed findings. Operators can
+  select fewer columns or split files. Import limits are unchanged; no preview limit
+  silently truncates a review. Full selected-cell results are retained in memory;
+  full unselected data stays in the CSV worker.
+
+Verification so far:
+
+- Unit tests exercise uncertainty, revisions, approval invalidation, frozen bulk
+  actions, manual provenance, immutable originals, exact spans and partial failures.
+- Node retained-review measurements on this host: 10,000 short plain-text cells
+  completed in 39 ms with a 15.2 MiB heap delta; 10,000 representative Myanmar
+  Unicode cells in 222 ms with a 23.9 MiB delta. A previous 20,000-cell plain-text
+  trial reached the result budget after 19,184 cells; the supported cell guard was
+  reduced to 10,000. These are synthetic observations, not browser peak-memory or
+  cross-device latency promises.
+- The expanded Chromium suite passed 20 tests, including both supplied CSVs
+  imported and inspected through the selected column, with byte-identical original
+  downloads. A 10,000-cell plain-text review completed in approximately 1.4 seconds
+  on this host; only 25 result rows rendered at a time. All selected rows were included.
+- Browser tests cover the complete review/approval flow, bounded queues, cancellation,
+  startup failure and explicit recovery, resource rejection, and original/proposal
+  parity with the pinned services. Both CSV/language workers and the window were
+  instrumented for processing requests and automatic storage writes; none occurred.
+- `pnpm verify:clean` passed: empty-store frozen install, generated types, formatting,
+  lint, both typechecks, 69 tests across seven files, production build and worker
+  separation, isolated offline artifact consumption, and all 18 standard Chromium
+  tests. The separate supplied-file run passed 20 browser tests as recorded above.
+- Synthetic desktop/narrow screenshots were visually reviewed. No supplied-file
+  text was committed or included in screenshots. Nothing was pushed, published or deployed.
+- Follow-up UI fixes center the cell dialog, keep it within the viewport, correct
+  text pagination widths and align settings controls. Encoding uncertainty now
+  explains that numerals, punctuation and short words may share both encodings;
+  it does not imply incorrect text. Conversion-disabled status is distinct. The
+  upstream detector, unresolved evidence and approval rules remain unchanged.
+- After these fixes, `pnpm check` passed with 70 tests, and `pnpm test:browser`
+  passed all 19 standard Chromium tests. Dialog positioning, scrolling and button
+  widths were tested at 1440, 1024 and 390 pixels; synthetic dialog screenshots
+  were visually reviewed. The earlier clean-source and supplied-file checks above
+  predate these UI-only fixes.
+
+Reviewed export, reports, explicit saving/resuming and portable backups are the
+next milestone. No new dependency or essential unresolved decision was needed.
+Hosted CI, Firefox/WebKit, screen readers, low-powered device peak-memory profiling,
+and independent linguistic/operator validation remain outstanding.
 
 ## Delivery sequence
 
@@ -415,5 +493,5 @@ and peak-memory measurements on lower-powered devices remain unverified.
    execution after its design gate is resolved.
 
 The user need not purchase a domain, provision hosting, publish packages, or supply
-production credentials. The next milestone is local inspection, proposed changes,
-review queues and approvals, following the confirmed processing/review semantics.
+production credentials. The next milestone is safe reviewed exports, reports, explicit save/resume and
+portable backups, following the confirmed integrity and approval semantics.

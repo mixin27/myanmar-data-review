@@ -30,10 +30,16 @@ change GitHub settings without explicit authorization.
 
 ## Scope and verification
 
-Current milestone: lossless UTF-8 CSV import, immutable source and positional
-record identity, layout confirmation, explicit column selection and bounded data
-preview. Inspection findings, proposals/approvals, saved projects, export reporting,
-authentication and API mode follow in the planned order.
+Current milestone: local inspection, proposed changes, review queues and approvals.
+CSV import and selection are complete. Saved projects, reviewed exports and reports
+follow next; authentication and API execution remain deferred.
+
+Keep processing state separate from review decisions and diagnostic resolution.
+Approvals bind to proposal revisions; settings, content or engine changes invalidate
+them. Bulk approval freezes IDs/revisions and excludes manual or blocked proposals.
+Manual replacement always requires a separate approval and retains original findings.
+Preserve exact analyzed strings for all diagnostic spans. Process every selected
+cell within explicit resource guards, not just the current preview page.
 
 Product copy must be written for end users. Do not expose milestone labels, build
 identities, raw JSON, worker terminology or internal diagnostics in the product UI.

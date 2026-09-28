@@ -25,6 +25,16 @@ for (const [index, file] of files.entries()) {
     console.log(
       `Supplied CSV ${index + 1}: ${await page.locator(".pagination > span").innerText()}`,
     );
+    await page
+      .getByRole("button", { name: "Inspect selected text", exact: true })
+      .click();
+    await expect(
+      page.getByText("Inspection complete.", { exact: false }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    console.log(
+      `Supplied CSV ${index + 1}: selected-column inspection completed`,
+    );
     const download = page.waitForEvent("download");
     await page.getByRole("button", { name: "Download original" }).click();
     expect(await readFile((await (await download).path())!)).toEqual(

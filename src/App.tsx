@@ -10,6 +10,7 @@ import type {
 } from "./csv/contracts";
 import { DataTable } from "./components/DataTable";
 import { Icon } from "./components/Icon";
+import { ReviewPanel } from "./components/ReviewPanel";
 
 const initialOptions: CsvOptions = { delimiter: ",", hasHeader: true };
 const count = (value: number) => value.toLocaleString("en-US");
@@ -36,6 +37,7 @@ export function App() {
   const [notice, setNotice] = useState("");
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState(false);
+  const [reviewStarted, setReviewStarted] = useState(false);
   const session = useRef<ReturnType<typeof createCsvSession> | null>(null);
   const revision = useRef(0);
   const fileId = useRef("");
@@ -119,6 +121,7 @@ export function App() {
     }
     const id = crypto.randomUUID();
     fileId.current = id;
+    setReviewStarted(false);
     setFile(next);
     setOptions(initialOptions);
     setSelected(new Set());
@@ -144,6 +147,7 @@ export function App() {
   function reset() {
     revision.current++;
     session.current?.close();
+    setReviewStarted(false);
     setFile(null);
     setSummary(null);
     setPage(null);
@@ -670,6 +674,14 @@ export function App() {
                 className="text-button"
                 disabled={paging}
                 onClick={() => {
+                  if (
+                    reviewStarted &&
+                    !window.confirm(
+                      "Changing columns clears the current review, proposals and approvals. Continue?",
+                    )
+                  )
+                    return;
+                  setReviewStarted(false);
                   setDraft(new Set(selected));
                   setSearch("");
                   setEditing(true);
@@ -679,6 +691,16 @@ export function App() {
                 Change columns
               </button>
             </div>
+            {file && (
+              <ReviewPanel
+                key={summary.id}
+                file={file}
+                options={options}
+                summary={summary}
+                selected={selected}
+                onReviewStarted={() => setReviewStarted(true)}
+              />
+            )}
             <div className="surface data-surface">
               <div className="section-heading">
                 <h2>Original data</h2>

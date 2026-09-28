@@ -1,14 +1,16 @@
 # Myanmar Data Review
 
 A private, local-first workflow for carefully reviewing Myanmar text in CSV files.
-The current milestone opens a CSV, confirms its layout, and lets you select the
-columns to review. It preserves the original values and file bytes.
+Open a CSV, confirm its layout, choose text columns, then inspect encoding and
+Burmese structure. Review proposed Unicode changes and approve them deliberately.
+Original values and source bytes remain preserved.
 
 The interface now follows a three-step import flow. Engineering test screens,
 raw diagnostics and build identities are excluded from the product build.
 “File ready for review” means import is complete; it does not mean that language
-inspection or conversion has run. Findings, proposed changes and approvals are
-the next milestone in [PRODUCT_PLAN.md](PRODUCT_PLAN.md).
+inspection or conversion has run. Choose Inspect selected text to see findings.
+Reviewed exports and explicit save/resume are the next milestone in
+[PRODUCT_PLAN.md](PRODUCT_PLAN.md).
 
 ## Run
 
@@ -33,11 +35,28 @@ it is not a reviewed-data export.
 - Explicit column selection, five-row layout preview and 25-row paged data table.
 - Cancellation, timeout, failure recovery and suppression of stale results.
 - File replacement confirmation and unsaved-work navigation warning.
+- Local inspection of all selected cells, with encoding and structural evidence.
+- Opt-in Unicode conversion and NFC, original/proposal comparison, review queues.
+- Separate manual proposals and approval, revision-bound cell/bulk decisions.
+- Partial failure status, preserved completed findings, explicit retry and cancellation.
 
 Limits are 10 MiB/file, 50,000 data rows, 100 columns, 500,000 fields including
 headers and 100,000 UTF-16 code units/value. The 30-second deadline is a safety
 limit. These guards were exercised with synthetic profiles; they are not capacity
 or latency guarantees across devices. No partial import is exposed on failure.
+
+Review accepts up to 10,000 selected cells, with a cumulative 16,000,000-code-unit
+serialized-result guard. Select fewer columns or split files if needed. A result
+budget or worker failure stops processing explicitly, retaining completed findings
+and marking remaining cells uninspected. The 30-second processing timeout applies
+to each cell, not the whole dataset. Reviews and approvals remain in memory only.
+
+Inspect first. Then enable Propose Unicode conversion or Normalize Unicode (NFC)
+if desired and run inspection again. Starting a new review clears previous findings,
+proposals and approvals after confirmation. Use the review queues and individual
+cell view to approve changes, keep originals, or propose manual replacements.
+Unresolved findings remain visible after manual decisions. Download original always
+returns the unmodified input, including after approval.
 
 ## Verify
 
@@ -69,7 +88,7 @@ typechecking; hosted CI has not run because nothing has been pushed.
 
 Optional local supplied-file reproduction: set `MDR_LOCAL_CSV_FILES` to a JSON
 array of absolute CSV paths, then run `pnpm test:browser`. Those files are used
-locally for import/download checks, never committed or included in screenshots.
+locally for import/selected-column inspection/download checks, never committed or included in screenshots.
 Without that environment variable the tests use only provenance-recorded synthetic
 fixtures. Fixture content is data, never instructions.
 
@@ -86,10 +105,13 @@ UTF-8 decoding and immutable records. `import.worker.ts` owns the parsed dataset
 `client.ts` manages cancellation, request identity, deadlines and page retrieval.
 The UI never receives the complete dataset merely to render a page.
 
-The pinned language-processing integration remains under `src/processing/` for
-the next milestone. Its worker calls public `@myanlex/application` services; no
-linguistic algorithms were copied. Tests verify service parity and lifecycle
-behavior through the test-only harness. See [AGENTS.md](AGENTS.md).
+The `src/review/` domain models proposal revisions, review decisions and frozen
+bulk approvals independently of React. The runner collects selected strings via
+bounded CSV pages and processes them sequentially through `src/processing/`.
+The dedicated worker calls public `@myanlex/application` services; no linguistic
+algorithms were copied. Results remain in memory, distinct from immutable sources.
+Tests exercise both the product flow and a test-only parity harness. See
+[AGENTS.md](AGENTS.md).
 
 [The artifact manifest and recipe](vendor/myanlex/README.md) pin upstream commit
 `51d8d6353d7f08fe389e046fac4c5953a70de33b`, package SHA-256/SHA-512 integrity,

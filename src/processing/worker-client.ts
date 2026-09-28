@@ -34,9 +34,11 @@ interface ActiveRun {
 export class LocalWorkerClient {
   private active: ActiveRun | undefined;
   private nextId = 0;
+  private reusableWorker: WorkerPort | undefined;
   constructor(
     private readonly factory: () => WorkerPort,
     private readonly timeoutMs = 30_000,
+    private readonly reuseWorker = false,
   ) {
     if (
       !Number.isSafeInteger(timeoutMs) ||
@@ -49,7 +51,11 @@ export class LocalWorkerClient {
 
   cancel(code = "cancelled"): void {
     const run = this.active;
-    if (!run) return;
+    if (!run) {
+      this.reusableWorker?.terminate();
+      this.reusableWorker = undefined;
+      return;
+    }
     this.cleanup(run);
     run.reject(
       new LocalProcessingError(
@@ -62,7 +68,7 @@ export class LocalWorkerClient {
   }
 
   execute(input: ProcessingInput, revision: number): Promise<ProcessingResult> {
-    this.cancel("superseded");
+    if (this.active) this.cancel("superseded");
     if (!Number.isSafeInteger(revision) || revision < 0) {
       return Promise.reject(
         new LocalProcessingError("invalid_request", "Invalid revision."),
@@ -76,7 +82,8 @@ export class LocalWorkerClient {
     };
     return new Promise((resolve, reject) => {
       try {
-        const worker = this.factory();
+        const worker = this.reusableWorker ?? this.factory();
+        if (this.reuseWorker) this.reusableWorker = worker;
         const run: ActiveRun = {
           worker,
           request,
@@ -123,7 +130,7 @@ export class LocalWorkerClient {
             failed();
             return;
           }
-          this.cleanup(run);
+          this.cleanup(run, this.reuseWorker);
           if (data.ok) resolve(data.result);
           else
             reject(
@@ -143,12 +150,15 @@ export class LocalWorkerClient {
     });
   }
 
-  private cleanup(run: ActiveRun): void {
+  private cleanup(run: ActiveRun, keepWorker = false): void {
     if (this.active === run) this.active = undefined;
     clearTimeout(run.timer);
     run.worker.onmessage = null;
     run.worker.onerror = null;
     run.worker.onmessageerror = null;
-    run.worker.terminate();
+    if (!keepWorker) {
+      run.worker.terminate();
+      this.reusableWorker = undefined;
+    }
   }
 }

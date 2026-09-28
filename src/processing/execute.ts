@@ -7,6 +7,11 @@ const application = createMyanLexApplication();
 
 export function executeLocal(input: ProcessingInput): ProcessingResult {
   const detection = application.detectText({ text: input.text });
+  const originalValidation =
+    detection.encoding === "unicode" &&
+    !detection.segments.some((segment) => segment.encoding === "unknown")
+      ? application.validateOrthography({ text: input.text })
+      : null;
   let output = input.text;
   let conversion: ProcessingResult["conversion"] = null;
   let normalization: ProcessingResult["normalization"] = null;
@@ -39,7 +44,10 @@ export function executeLocal(input: ProcessingInput): ProcessingResult {
       output = normalization.output;
     }
     if (detection.encoding !== "non_myanmar")
-      validation = application.validateOrthography({ text: output });
+      validation =
+        output === input.text && originalValidation
+          ? originalValidation
+          : application.validateOrthography({ text: output });
   }
   return {
     original: input.text,
@@ -49,6 +57,7 @@ export function executeLocal(input: ProcessingInput): ProcessingResult {
     conversion,
     normalization,
     validation,
+    originalValidation,
     unresolvedReason,
     engine: engineBuild,
   };
