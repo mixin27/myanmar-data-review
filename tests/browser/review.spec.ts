@@ -139,9 +139,9 @@ test("bulk approval is explicit and excludes unresolved and manual proposals", a
     .getByRole("button", { name: "Review row 6,", exact: false })
     .click();
   await page.getByText("Why this was flagged", { exact: true }).click();
-  await expect(page.getByRole("dialog").locator("mark").first()).toHaveText(
-    "အျပည္ျပည္ဆိုင္ရာ",
-  );
+  await expect(
+    page.getByRole("dialog").locator(".evidence mark").first(),
+  ).toHaveText("အျပည္ျပည္ဆိုင္ရာ");
   await page.getByRole("button", { name: "Close", exact: true }).click();
   await page.screenshot({
     path: "test-results/review-desktop.png",
@@ -348,4 +348,191 @@ test("review dialogs stay centered and numeral uncertainty is explained without 
     "Uncertain encoding",
   );
   await expect(page.locator(".review-table")).toContainText("Keep original");
+});
+
+test("search, filtered approval, navigation, duplicate decisions and undo", async ({
+  page,
+}) => {
+  await open(page, [data[0]!, data[0]!, data[2]!]);
+  await inspect(page);
+  await convert(page);
+  await page.getByLabel("Review queue").selectOption("all");
+  await page
+    .getByRole("searchbox", { name: "Search text" })
+    .fill("no matching text");
+  await expect(
+    page.getByText("No cells in this view", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Approve eligible changes", exact: true }),
+  ).toBeDisabled();
+  await page
+    .getByRole("button", { name: "Clear filters", exact: true })
+    .click();
+  await page.getByLabel("Row number", { exact: true }).fill("1");
+  await page.getByRole("button", { name: "Go to row", exact: true }).click();
+  const detail = page.locator(".cell-dialog[open]");
+  await expect(
+    detail.getByRole("heading", { name: "Review row 1", exact: true }),
+  ).toBeVisible();
+  await expect(detail.locator(".diff-added")).not.toHaveText("");
+  await page.keyboard.press("Alt+n");
+  await expect(
+    detail.getByRole("heading", { name: "Review row 2", exact: true }),
+  ).toBeVisible();
+  await detail
+    .getByRole("button", { name: "Previous cell", exact: true })
+    .click();
+  await detail.getByText("Review matching values", { exact: true }).click();
+  await detail
+    .getByRole("button", {
+      name: "Approve matching eligible changes",
+      exact: true,
+    })
+    .click();
+  const confirmation = page.getByRole("dialog", {
+    name: "Confirm matching values",
+  });
+  await expect(confirmation).toContainText("2 matching cells");
+  await confirmation
+    .getByRole("button", { name: "Confirm decision", exact: true })
+    .click();
+  await page.getByLabel("Review queue").selectOption("approved");
+  await expect(page.locator(".review-table tbody tr")).toHaveCount(2);
+  await page
+    .getByRole("button", { name: "Undo last review action", exact: true })
+    .click();
+  await expect(
+    page.getByText("No cells in this view", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Clear filters", exact: true })
+    .click();
+  await page
+    .getByLabel("Finding", { exact: true })
+    .selectOption("Zawgyi evidence");
+  await expect(page.locator(".review-table tbody tr")).toHaveCount(2);
+  await page
+    .getByRole("button", { name: "Approve eligible changes", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Confirm approval", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Clear filters", exact: true })
+    .click();
+  await page.getByLabel("Decision", { exact: true }).selectOption("unreviewed");
+  await expect(page.locator(".review-table tbody tr")).toHaveCount(1);
+});
+
+test("Myanmar interface keeps source values and decisions unchanged, without persistence or processing traffic", async ({
+  page,
+}) => {
+  await open(page, ["Save project", data[0]!]);
+  await inspect(page);
+  await page.getByLabel("Review queue").selectOption("all");
+  const traffic: string[] = [];
+  page.on("request", (request) => traffic.push(request.url()));
+  await page.getByLabel("Language / ဘာသာစကား").selectOption("my");
+  await expect(page.locator("html")).toHaveAttribute("lang", "my");
+  await expect(
+    page.getByRole("heading", { name: "ပြန်လည်ကြည့်ရှုရန် လိုအပ်သည့်အရာများ" }),
+  ).toBeVisible();
+  await expect(page.locator(".review-table")).toContainText("Save project");
+  await expect(page.locator(".review-table")).toContainText(data[0]!);
+  await page
+    .locator(".review-table tbody tr")
+    .nth(1)
+    .getByRole("button")
+    .click();
+  await expect(page.locator(".cell-dialog pre").first()).toHaveText(data[0]!);
+  await page
+    .getByRole("button", { name: "မူရင်းအတိုင်း ထားရန်", exact: true })
+    .click();
+  await page.getByLabel("Language / ဘာသာစကား").selectOption("en");
+  await page.getByLabel("Review queue").selectOption("kept");
+  await expect(page.locator(".review-table tbody tr")).toHaveCount(1);
+  await expect(page.locator(".review-table")).toContainText(data[0]!);
+  expect(traffic).toEqual([]);
+  expect(
+    await page.evaluate(async () => ({
+      local: localStorage.length,
+      session: sessionStorage.length,
+      databases: (await indexedDB.databases()).length,
+    })),
+  ).toEqual({ local: 0, session: 0, databases: 0 });
+  await page.getByLabel("Language / ဘာသာစကား").selectOption("my");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+});
+
+test("Myanmar import controls and draft navigation remain usable", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("Language / ဘာသာစကား").selectOption("my");
+  await page.getByLabel("CSV ဖိုင်ရွေးရန်", { exact: true }).setInputFiles({
+    name: "language.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from("Text\nSame\nSame"),
+  });
+  await page
+    .getByRole("button", { name: "ဤဖွဲ့စည်းပုံကို အသုံးပြုရန်", exact: true })
+    .click();
+  await page
+    .getByRole("checkbox", { name: "ကော်လံ 1: Text", exact: true })
+    .check();
+  await page
+    .getByRole("button", { name: "ဖိုင်ဖွင့်ရန်", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "ရွေးထားသော စာသားကို စစ်ဆေးရန်", exact: true })
+    .click();
+  await expect(
+    page.getByText("စစ်ဆေးပြီးပါပြီ။", { exact: false }),
+  ).toBeVisible();
+  await page.getByLabel("သုံးသပ်ရန် စာရင်း").selectOption("all");
+  await page.getByLabel("Language / ဘာသာစကား").selectOption("en");
+  await expect(
+    page.getByText("Inspection complete.", { exact: false }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Review row 1,", exact: false })
+    .click();
+  const detail = page.locator(".cell-dialog[open]");
+  await detail.getByText("Write a replacement", { exact: true }).click();
+  const input = detail.getByLabel("Replacement text");
+  await input.fill("Unproposed draft");
+  await input.press("Alt+n");
+  await expect(
+    detail.getByRole("heading", { name: "Review row 1", exact: true }),
+  ).toBeVisible();
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await detail.getByRole("button", { name: "Next cell", exact: true }).click();
+  await expect(input).toHaveValue("Unproposed draft");
+  page.once("dialog", (dialog) => dialog.accept());
+  await detail.getByRole("button", { name: "Next cell", exact: true }).click();
+  await expect(
+    detail.getByRole("heading", { name: "Review row 2", exact: true }),
+  ).toBeVisible();
+  await detail.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByLabel("Language / ဘာသာစကား").selectOption("my");
+  await page.screenshot({
+    path: "test-results/review-myanmar-desktop.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({
+    path: "test-results/review-myanmar-narrow.png",
+    fullPage: true,
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });

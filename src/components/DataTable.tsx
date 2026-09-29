@@ -1,3 +1,4 @@
+import { useI18n } from "../i18n";
 import { columnLabel } from "../csv/contracts";
 import type { CsvColumn, CsvPage } from "../csv/contracts";
 export function DataTable({
@@ -11,23 +12,25 @@ export function DataTable({
   selected: ReadonlySet<string>;
   preview?: boolean;
 }) {
+  const { t } = useI18n();
+
   return (
     <div
       className="table-scroll"
       tabIndex={0}
       role="region"
-      aria-label={preview ? "File preview" : "Original file data"}
+      aria-label={preview ? t("File preview") : t("Original file data")}
     >
       <table>
         <caption className="sr-only">
           {preview
-            ? "First five data rows. Values are unchanged."
-            : "Original data. Selected columns are marked for review."}
+            ? t("First five data rows. Values are unchanged.")
+            : t("Original data. Selected columns are marked for review.")}
         </caption>
         <thead>
           <tr>
             <th scope="col" className="row-number">
-              Row
+              {t("Row ")}
             </th>
             {columns.map((column) => (
               <th
@@ -38,7 +41,7 @@ export function DataTable({
                 <span className="column-position">{column.index + 1}</span>
                 <span>{columnLabel(column)}</span>
                 {selected.has(column.id) && (
-                  <span className="column-status">To review</span>
+                  <span className="column-status">{t("To review")}</span>
                 )}
               </th>
             ))}
@@ -61,12 +64,16 @@ export function DataTable({
                 >
                   <span className="cell-value">
                     {value === "" ? (
-                      <span className="empty-value" aria-label="Empty value">
-                        —
+                      <span
+                        className="empty-value"
+                        aria-label={t("Empty value")}
+                      >
+                        {t("— ")}
                       </span>
                     ) : value.length > 240 ? (
-                      <span title="Long value shortened in this preview">
-                        {value.slice(0, 240)}…
+                      <span title={t("Long value shortened in this preview")}>
+                        {value.slice(0, 240)}
+                        {t("… ")}
                       </span>
                     ) : (
                       value

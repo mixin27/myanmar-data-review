@@ -1,3 +1,4 @@
+import { LanguagePicker, useI18n } from "./i18n";
 import { ProjectLibrary } from "./components/ProjectLibrary";
 import type { OpenedProject } from "./components/ProjectLibrary";
 import { useEffect, useRef, useState } from "react";
@@ -22,6 +23,8 @@ const fileSize = (value: number) =>
     : `${(value / 1024 / 1024).toFixed(1)} MB`;
 
 export function App() {
+  const { t } = useI18n();
+
   const [dirty, setDirty] = useState(false);
   const [restored, setRestored] = useState<OpenedProject | null>(null);
   const [projectReadOnly, setProjectReadOnly] = useState(false);
@@ -281,24 +284,26 @@ export function App() {
             event.preventDefault();
             if (file) dialog.current?.showModal();
           }}
-          aria-label="Myanmar Data Review home"
+          aria-label={t("Myanmar Data Review home")}
         >
           <span className="brand-symbol" aria-hidden="true">
-            မ
+            {t("မ ")}
           </span>
           <span>
-            Myanmar<span className="brand-light"> Data Review</span>
+            {t("Myanmar")}
+            <span className="brand-light"> {t("Data Review")}</span>
           </span>
         </a>
+        <LanguagePicker />
         <ProjectLibrary onOpen={restoreProject} hasFile={!!file} />
         <span className="privacy-badge">
           <Icon name="lock" size={15} />
-          Only on your device
+          {t("Only on your device ")}
         </span>
       </header>
       <main className={`workspace ${step === "data" ? "wide-workspace" : ""}`}>
         {step !== "data" && (
-          <nav aria-label="Import progress" className="steps">
+          <nav aria-label={t("Import progress")} className="steps">
             <ol>
               {["Choose file", "Check layout", "Choose columns"].map(
                 (label, index) => (
@@ -320,7 +325,7 @@ export function App() {
                         index + 1
                       )}
                     </span>
-                    <span>{label}</span>
+                    <span>{t(label)}</span>
                   </li>
                 ),
               )}
@@ -331,16 +336,18 @@ export function App() {
         {step === "file" && (
           <section className="welcome">
             <div className="page-intro">
-              <span className="eyebrow">A clearer start for your data</span>
+              <span className="eyebrow">
+                {t("A clearer start for your data")}
+              </span>
               <h1 ref={heading} tabIndex={-1}>
-                Bring your Myanmar text
+                {t("Bring your Myanmar text ")}
                 <br />
-                into focus.
+                {t("into focus. ")}
               </h1>
               <p>
-                Open a CSV and choose the columns you want to review.
-                <br className="desktop-break" /> Your original file stays
-                untouched.
+                {t("Open a CSV and choose the columns you want to review. ")}
+                <br className="desktop-break" />{" "}
+                {t("Your original file stays untouched. ")}
               </p>
             </div>
             <div
@@ -359,30 +366,35 @@ export function App() {
               <div className="upload-icon">
                 <Icon name="upload" size={27} />
               </div>
-              <h2>Start with your CSV</h2>
-              <p>Drag a file here, or choose one from your device.</p>
+              <h2>{t("Start with your CSV")}</h2>
+              <p>{t("Drag a file here, or choose one from your device.")}</p>
               <button
                 className="button primary"
                 onClick={() => chooser.current?.click()}
               >
                 <Icon name="file" size={18} />
-                Choose CSV file
+                {t("Choose CSV file ")}
               </button>
-              <span className="file-guidance">UTF-8 CSV · Up to 10 MB</span>
+              <span className="file-guidance">
+                {t("UTF-8 CSV · Up to 10 MB")}
+              </span>
             </div>
             <div className="reassurance">
               <Icon name="lock" size={18} />
               <p>
-                Your file stays in this browser. Nothing is uploaded or saved
-                automatically.
+                {t(
+                  "Your file stays in this browser. Nothing is uploaded or saved automatically. ",
+                )}
               </p>
             </div>
             <details className="help-note">
-              <summary>Need to prepare your file?</summary>
+              <summary>{t("Need to prepare your file?")}</summary>
               <p>
-                In your spreadsheet app, save a copy as{" "}
-                <strong>CSV UTF-8</strong>. Commas, semicolons, and tabs are
-                supported. Keep the original spreadsheet as your backup.
+                {t("In your spreadsheet app, save a copy as")}{" "}
+                <strong>{t("CSV UTF-8")}</strong>
+                {t(
+                  ". Commas, semicolons, and tabs are supported. Keep the original spreadsheet as your backup. ",
+                )}
               </p>
             </details>
           </section>
@@ -393,20 +405,23 @@ export function App() {
           accept=".csv,.tsv,text/csv,text/tab-separated-values"
           className="sr-only"
           tabIndex={-1}
-          aria-label="Choose CSV file"
+          aria-label={t("Choose CSV file")}
           onChange={(event) => choose(event.target.files)}
         />
 
         {step === "layout" && file && (
           <section>
             <div className="page-intro compact">
-              <span className="eyebrow">Make sure everything lines up</span>
+              <span className="eyebrow">
+                {t("Make sure everything lines up")}
+              </span>
               <h1 ref={heading} tabIndex={-1}>
-                Check your file’s layout
+                {t("Check your file’s layout ")}
               </h1>
               <p>
-                Choose how values are separated, then check the preview before
-                continuing.
+                {t(
+                  "Choose how values are separated, then check the preview before continuing. ",
+                )}
               </p>
             </div>
             <div className="file-banner">
@@ -415,19 +430,21 @@ export function App() {
               </span>
               <div>
                 <strong>{file.name}</strong>
-                <span>{fileSize(file.size)} · Original file</span>
+                <span>
+                  {fileSize(file.size)} {t("· Original file")}
+                </span>
               </div>
               <button
                 className="text-button"
                 onClick={() => dialog.current?.showModal()}
               >
-                Choose another file
+                {t("Choose another file ")}
               </button>
             </div>
             <div className="surface">
               <div className="layout-controls">
                 <label className="field-label" htmlFor="separator">
-                  Values are separated by
+                  {t("Values are separated by ")}
                   <select
                     id="separator"
                     value={options.delimiter}
@@ -438,9 +455,9 @@ export function App() {
                       })
                     }
                   >
-                    <option value=",">Comma (,)</option>
-                    <option value=";">Semicolon (;)</option>
-                    <option value={"\t"}>Tab</option>
+                    <option value=",">{t("Comma (,)")}</option>
+                    <option value=";">{t("Semicolon (;)")}</option>
+                    <option value={"\t"}>{t("Tab")}</option>
                   </select>
                 </label>
                 <label className="checkbox-label">
@@ -455,33 +472,35 @@ export function App() {
                     }
                   />
                   <span>
-                    First row contains column names
-                    <small>Turn this off if the first row is data.</small>
+                    {t("First row contains column names ")}
+                    <small>
+                      {t("Turn this off if the first row is data.")}
+                    </small>
                   </span>
                 </label>
               </div>
               {busy && (
                 <div className="loading-panel" role="status">
                   <span className="spinner" />
-                  <h2>Opening your file…</h2>
-                  <p>Checking rows and keeping every original value.</p>
+                  <h2>{t("Opening your file…")}</h2>
+                  <p>{t("Checking rows and keeping every original value.")}</p>
                   <progress
                     value={progress}
                     max={100}
-                    aria-label="Opening file"
+                    aria-label={t("Opening file")}
                   />
                   <button className="text-button" onClick={cancelOpen}>
-                    Cancel
+                    {t("Cancel ")}
                   </button>
                 </div>
               )}
               {!busy && summary && (
                 <>
                   <div className="section-heading">
-                    <h2>Preview</h2>
+                    <h2>{t("Preview")}</h2>
                     <span>
-                      {count(summary.rowCount)} rows ·{" "}
-                      {count(summary.columns.length)} columns
+                      {count(summary.rowCount)} {t("rows ·")}{" "}
+                      {count(summary.columns.length)} {t("columns ")}
                     </span>
                   </div>
                   <DataTable
@@ -491,25 +510,26 @@ export function App() {
                     preview
                   />
                   <p className="table-note">
-                    Showing the first {summary.preview.rows.length} data rows.
-                    Long values are shortened in the preview.
+                    {t("Showing the first ")}
+                    {summary.preview.rows.length}{" "}
+                    {t("data rows. Long values are shortened in the preview. ")}
                   </p>
                 </>
               )}
               {!busy && !summary && !problem && (
                 <div className="empty-panel">
-                  <p>{notice || "Open the file to check its layout."}</p>
+                  <p>{t(notice || "Open the file to check its layout.")}</p>
                   <button
                     className="button secondary"
                     onClick={() => void open(file, options, fileId.current)}
                   >
-                    Try again
+                    {t("Try again ")}
                   </button>
                 </div>
               )}
             </div>
             <div className="action-bar">
-              <span>Nothing in your file has been changed.</span>
+              <span>{t("Nothing in your file has been changed.")}</span>
               <button
                 className="button primary"
                 disabled={busy || !summary}
@@ -518,7 +538,7 @@ export function App() {
                   setStep("columns");
                 }}
               >
-                Use this layout
+                {t("Use this layout ")}
                 <Icon name="arrow" size={18} />
               </button>
             </div>
@@ -528,35 +548,40 @@ export function App() {
         {step === "columns" && summary && (
           <section>
             <div className="page-intro compact">
-              <span className="eyebrow">You decide what gets reviewed</span>
+              <span className="eyebrow">
+                {t("You decide what gets reviewed")}
+              </span>
               <h1 ref={heading} tabIndex={-1}>
-                Choose your text columns
+                {t("Choose your text columns ")}
               </h1>
               <p>
-                Select columns containing Myanmar text. Leave IDs, dates, and
-                other values unselected.
+                {t(
+                  "Select columns containing Myanmar text. Leave IDs, dates, and other values unselected. ",
+                )}
               </p>
             </div>
             <div className="selection-layout">
               <div className="surface column-picker">
                 <div className="section-heading">
                   <h2>
-                    Columns in your file{" "}
+                    {t("Columns in your file")}{" "}
                     <span className="count-badge">
                       {summary.columns.length}
                     </span>
                   </h2>
-                  <span>{draft.size} selected</span>
+                  <span>
+                    {draft.size} {t("selected")}
+                  </span>
                 </div>
                 {summary.columns.length > 8 && (
                   <div className="column-search">
                     <label htmlFor="column-search" className="sr-only">
-                      Find a column
+                      {t("Find a column ")}
                     </label>
                     <input
                       id="column-search"
                       type="search"
-                      placeholder="Find a column…"
+                      placeholder={t("Find a column…")}
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                     />
@@ -572,13 +597,14 @@ export function App() {
                         type="checkbox"
                         checked={draft.has(column.id)}
                         onChange={() => toggle(column.id)}
-                        aria-label={`Column ${column.index + 1}: ${columnLabel(column)}`}
+                        aria-label={`${t("Column")} ${column.index + 1}: ${columnLabel(column)}`}
                       />
                       <span className="column-copy">
                         <strong>{columnLabel(column)}</strong>
                         <small>
-                          Column {column.index + 1}
-                          <span aria-hidden="true"> · </span>
+                          {t("Column ")}
+                          {column.index + 1}
+                          <span aria-hidden="true"> {t("· ")}</span>
                           <span>
                             {summary.preview.rows
                               .map((row) => row.values[column.index])
@@ -598,7 +624,7 @@ export function App() {
                   ))}
                   {!displayedColumns.length && (
                     <p className="empty-panel">
-                      No matching columns. Try another name.
+                      {t("No matching columns. Try another name. ")}
                     </p>
                   )}
                 </div>
@@ -607,15 +633,17 @@ export function App() {
                 <span className="note-icon">
                   <Icon name="check" size={22} />
                 </span>
-                <h2>A focused review</h2>
+                <h2>{t("A focused review")}</h2>
                 <p>
-                  Only the columns you choose will be included in your text
-                  review.
+                  {t(
+                    "Only the columns you choose will be included in your text review. ",
+                  )}
                 </p>
                 <hr />
                 <p>
-                  All rows and columns stay in the file. Selecting a column does
-                  not change its values.
+                  {t(
+                    "All rows and columns stay in the file. Selecting a column does not change its values. ",
+                  )}
                 </p>
                 <span className="mini-file">
                   <Icon name="file" size={16} />
@@ -630,13 +658,13 @@ export function App() {
                 onClick={() => setStep(editing ? "data" : "layout")}
               >
                 <Icon name="back" size={16} />
-                {editing ? "Cancel" : "Back to layout"}
+                {editing ? t("Cancel") : t("Back to layout")}
               </button>
               <div className="action-group">
                 <span>
                   {draft.size
                     ? `${draft.size} ${draft.size === 1 ? "column" : "columns"} selected`
-                    : "Choose at least one column"}
+                    : t("Choose at least one column")}
                 </span>
                 <button
                   className="button primary"
@@ -644,10 +672,10 @@ export function App() {
                   onClick={() => void finishSelection()}
                 >
                   {paging
-                    ? "Opening…"
+                    ? t("Opening…")
                     : editing
-                      ? "Save selection"
-                      : "Open file"}
+                      ? t("Save selection")
+                      : t("Open file")}
                   <Icon name="arrow" size={18} />
                 </button>
               </div>
@@ -659,28 +687,28 @@ export function App() {
           <section>
             <div className="dataset-heading">
               <div>
-                <span className="eyebrow">File ready for review</span>
+                <span className="eyebrow">{t("File ready for review")}</span>
                 <h1 ref={heading} tabIndex={-1}>
                   {summary.name}
                 </h1>
                 <p>
-                  {count(summary.rowCount)} rows
-                  <span className="meta-dot">·</span>
-                  {summary.columns.length} columns
-                  <span className="meta-dot">·</span>
+                  {count(summary.rowCount)} {t("rows ")}
+                  <span className="meta-dot">{t("·")}</span>
+                  {summary.columns.length} {t("columns ")}
+                  <span className="meta-dot">{t("·")}</span>
                   {fileSize(summary.bytes)}
                 </p>
               </div>
               <div className="dataset-actions">
                 <button className="button secondary" onClick={downloadOriginal}>
                   <Icon name="download" size={17} />
-                  Download original
+                  {t("Download original ")}
                 </button>
                 <button
                   className="text-button"
                   onClick={() => dialog.current?.showModal()}
                 >
-                  Open another file
+                  {t("Open another file ")}
                 </button>
               </div>
             </div>
@@ -691,8 +719,10 @@ export function App() {
               <div>
                 <strong>
                   {selected.size}{" "}
-                  {selected.size === 1 ? "column chosen" : "columns chosen"} for
-                  review
+                  {selected.size === 1
+                    ? t("column chosen")
+                    : t("columns chosen")}{" "}
+                  {t("for review ")}
                 </strong>
                 <p>
                   {summary.columns
@@ -708,7 +738,9 @@ export function App() {
                   if (
                     reviewStarted &&
                     !window.confirm(
-                      "Changing columns clears the current review, proposals and approvals. Continue?",
+                      t(
+                        "Changing columns clears the current review, proposals and approvals. Continue?",
+                      ),
                     )
                   )
                     return;
@@ -720,7 +752,7 @@ export function App() {
                   setStep("columns");
                 }}
               >
-                Change columns
+                {t("Change columns ")}
               </button>
             </div>
             {file && (
@@ -738,8 +770,8 @@ export function App() {
             )}
             <div className="surface data-surface">
               <div className="section-heading">
-                <h2>Original data</h2>
-                <span>Original values</span>
+                <h2>{t("Original data")}</h2>
+                <span>{t("Original values")}</span>
               </div>
               <div aria-busy={paging}>
                 <DataTable
@@ -750,26 +782,29 @@ export function App() {
               </div>
               <div className="pagination">
                 <span>
-                  Rows {count(page.offset + 1)}–
-                  {count(page.offset + page.rows.length)} of{" "}
+                  {t("Rows ")}
+                  {count(page.offset + 1)}
+                  {"–"}
+                  {count(page.offset + page.rows.length)} {t("of")}{" "}
                   {count(summary.rowCount)}
                 </span>
                 <div>
                   <button
                     className="button page-button"
-                    aria-label="Previous page"
+                    aria-label={t("Previous page")}
                     disabled={paging || page.offset === 0}
                     onClick={() => void showPage(Math.max(0, page.offset - 25))}
                   >
                     <Icon name="back" size={17} />
                   </button>
                   <span>
-                    Page {Math.floor(page.offset / 25) + 1} of{" "}
+                    {t("Page ")}
+                    {Math.floor(page.offset / 25) + 1} {t("of")}{" "}
                     {Math.ceil(summary.rowCount / 25)}
                   </span>
                   <button
                     className="button page-button"
-                    aria-label="Next page"
+                    aria-label={t("Next page")}
                     disabled={
                       paging ||
                       page.offset + page.rows.length >= summary.rowCount
@@ -783,8 +818,9 @@ export function App() {
             </div>
             <p className="unsaved-note">
               <Icon name="lock" size={15} />
-              Save changes explicitly to keep your progress. Download a backup
-              before clearing browser data.
+              {t(
+                "Save changes explicitly to keep your progress. Download a backup before clearing browser data. ",
+              )}
             </p>
           </section>
         )}
@@ -792,26 +828,30 @@ export function App() {
           <div className="error-panel" role="alert">
             <strong>
               {summary
-                ? "We couldn’t display this file"
-                : "We couldn’t open this file"}
+                ? t("We couldn’t display this file")
+                : t("We couldn’t open this file")}
             </strong>
-            <p>{problem.message}</p>
+            <p>{t(problem.message)}</p>
             {problem.record && (
               <p className="error-location">
-                Record {problem.record}
+                {t("Record ")}
+                {problem.record}
                 {problem.line ? ` · Line ${problem.line}` : ""}
                 {problem.field ? ` · Field ${problem.field}` : ""}
               </p>
             )}
             {step === "layout" && (
               <p>
-                Check the file layout above, or choose another file. No data has
-                been imported.
+                {t(
+                  "Check the file layout above, or choose another file. No data has been imported. ",
+                )}
               </p>
             )}
             {(step === "columns" || step === "data") && file && (
               <>
-                <p>Your original file is unchanged. Reopen it to continue.</p>
+                <p>
+                  {t("Your original file is unchanged. Reopen it to continue.")}
+                </p>
                 <button
                   className="button secondary"
                   onClick={() => {
@@ -819,7 +859,7 @@ export function App() {
                     void open(file, options, fileId.current);
                   }}
                 >
-                  Reopen file
+                  {t("Reopen file ")}
                 </button>
               </>
             )}
@@ -830,14 +870,14 @@ export function App() {
         </div>
       </main>
       <footer className="app-footer">
-        <span>Careful review. Original data preserved.</span>
+        <span>{t("Careful review. Original data preserved.")}</span>
         <details>
-          <summary>Licenses</summary>
-          <a href="/licenses/MyanLex-MIT.txt">MyanLex</a>
+          <summary>{t("Licenses")}</summary>
+          <a href="/licenses/MyanLex-MIT.txt">{t("MyanLex")}</a>
           <a href="/licenses/MyanLex-THIRD_PARTY_NOTICES.md">
-            Third-party notices
+            {t("Third-party notices ")}
           </a>
-          <a href="/licenses/Apache-2.0.txt">Apache-2.0</a>
+          <a href="/licenses/Apache-2.0.txt">{t("Apache-2.0")}</a>
         </details>
       </footer>
       <dialog
@@ -845,20 +885,21 @@ export function App() {
         className="confirm-dialog"
         aria-labelledby="discard-title"
       >
-        <h2 id="discard-title">Open a different file?</h2>
+        <h2 id="discard-title">{t("Open a different file?")}</h2>
         <p>
-          This will close the file in this tab and clear your column selection.
-          Your original file won’t be changed.
+          {t(
+            "This will close the file in this tab and clear your column selection. Your original file won’t be changed. ",
+          )}
         </p>
         <div className="dialog-actions">
           <button
             className="button secondary"
             onClick={() => dialog.current?.close()}
           >
-            Keep this file
+            {t("Keep this file ")}
           </button>
           <button className="button primary" onClick={reset}>
-            Choose another file
+            {t("Choose another file ")}
           </button>
         </div>
       </dialog>

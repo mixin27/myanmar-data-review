@@ -32,7 +32,8 @@ change GitHub settings without explicit authorization.
 
 ## Scope and verification
 
-Current priority: portable static-container preparation for DigitalOcean/AWS.
+Current priority: local review search/filters, navigation/diffs, undo, exact-value
+duplicate decisions and English/Myanmar interface. Portable static hosting is prepared.
 The user reports an existing Vercel deployment; leave it unchanged. API mode and
 authentication are deferred again at the user's request; the proposal is historical,
 not authorization to implement. Preserve anonymous Vite/worker processing without
@@ -52,7 +53,12 @@ them. Bulk approval freezes IDs/revisions and excludes manual or blocked proposa
 Manual replacement always requires a separate approval and retains original findings.
 Explicitly approved manual replacements are exported even if original findings
 remain unresolved; retain and report those findings. All other cells without an
-approved proposal keep originals. Export every row, regardless of review filters.
+approved proposal keep originals. Export every row, regardless of review filters. Search/filter state never changes
+source data or export scope. Duplicate decisions require explicit frozen selection
+confirmation: exact originals in the same column, identical eligible engine proposals
+for group approval; manual proposals remain excluded. Undo is bounded, session-only
+and cleared on reinspection/restore. It must restore revision-bound decisions without
+clearing findings. Translate UI copy only, never imported values or filenames.
 Device storage writes require explicit Save or Delete actions. Never process on
 restore. Backups are untrusted, versioned and bounded; restore as a new unsaved
 project. Preserve transaction atomicity, writer ownership and revision conflict checks.

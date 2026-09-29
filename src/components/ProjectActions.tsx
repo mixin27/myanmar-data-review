@@ -1,3 +1,4 @@
+import { useI18n } from "../i18n";
 import { useEffect, useRef, useState } from "react";
 import type {
   ExportOptions,
@@ -28,6 +29,8 @@ export function ProjectActions({
   onBusy: (value: boolean) => void;
   onDirty: (value: boolean) => void;
 }) {
+  const { t } = useI18n();
+
   const [saved, setSaved] = useState<SavedProject | null>(savedProject);
   const [savedVersion, setSavedVersion] = useState(savedProject ? version : -1);
   useEffect(() => {
@@ -161,17 +164,19 @@ export function ProjectActions({
       <div>
         <strong>
           {readOnly
-            ? "Read-only project"
+            ? t("Read-only project")
             : saved
               ? savedVersion === version
-                ? "Saved on this device"
-                : "Unsaved changes"
-              : "Unsaved project"}
+                ? t("Saved on this device")
+                : t("Unsaved changes")
+              : t("Unsaved project")}
         </strong>
         <p>
           {readOnly
-            ? "Another tab may be editing this project. Close it and reopen here to edit. You can still export or download a backup."
-            : "Save your progress or export the changes you have approved."}
+            ? t(
+                "Another tab may be editing this project. Close it and reopen here to edit. You can still export or download a backup.",
+              )
+            : t("Save your progress or export the changes you have approved.")}
         </p>
       </div>
       <div className="action-group">
@@ -182,7 +187,7 @@ export function ProjectActions({
             saved ? void task(save) : saveDialog.current?.showModal()
           }
         >
-          {saved ? "Save changes" : "Save project"}
+          {saved ? t("Save changes") : t("Save project")}
         </button>
         <button
           className="button secondary"
@@ -202,7 +207,7 @@ export function ProjectActions({
             })
           }
         >
-          Download backup
+          {t("Download backup ")}
         </button>
         <button
           className="button primary"
@@ -220,7 +225,7 @@ export function ProjectActions({
             exportDialog.current?.showModal();
           }}
         >
-          Export reviewed CSV
+          {t("Export reviewed CSV ")}
         </button>
         {saved && (
           <button
@@ -228,29 +233,27 @@ export function ProjectActions({
             disabled={pending || working || readOnly}
             onClick={() => deleteDialog.current?.showModal()}
           >
-            Delete saved project
+            {t("Delete saved project ")}
           </button>
         )}
       </div>
       {preparing && (
         <button className="text-button" onClick={() => client.current.cancel()}>
-          Cancel preparation
+          {t("Cancel preparation ")}
         </button>
       )}
-      {status && <p role="status">{status}</p>}
-      {error && <p role="alert">{error}</p>}
+      {status && <p role="status">{t(status)}</p>}
+      {error && <p role="alert">{t(error)}</p>}
       <dialog
         ref={saveDialog}
         className="confirm-dialog"
         aria-labelledby="save-title"
       >
-        <h2 id="save-title">Save this project on this device?</h2>
+        <h2 id="save-title">{t("Save this project on this device?")}</h2>
         <p>
-          This stores the original file, selected columns, settings, findings,
-          proposals and decisions in this browser profile. Other people using
-          this profile may access them. Browser data can be cleared or evicted;
-          keep a downloaded backup. Changes are saved only when you choose Save
-          changes.
+          {t(
+            "This stores the original file, selected columns, settings, findings, proposals and decisions in this browser profile. Other people using this profile may access them. Browser data can be cleared or evicted; keep a downloaded backup. Changes are saved only when you choose Save changes. ",
+          )}
         </p>
         <div className="dialog-actions">
           <button
@@ -258,14 +261,14 @@ export function ProjectActions({
             disabled={pending}
             onClick={() => saveDialog.current?.close()}
           >
-            Not now
+            {t("Not now ")}
           </button>
           <button
             className="button primary"
             disabled={pending}
             onClick={() => void task(save)}
           >
-            Save on this device
+            {t("Save on this device ")}
           </button>
         </div>
         {preparing && (
@@ -273,28 +276,28 @@ export function ProjectActions({
             className="button secondary"
             onClick={() => client.current.cancel()}
           >
-            Cancel preparation
+            {t("Cancel preparation ")}
           </button>
         )}
-        {error && <p role="alert">{error}</p>}
+        {error && <p role="alert">{t(error)}</p>}
       </dialog>
       <dialog
         ref={deleteDialog}
         className="confirm-dialog"
         aria-labelledby="delete-title"
       >
-        <h2 id="delete-title">Delete the saved project?</h2>
+        <h2 id="delete-title">{t("Delete the saved project?")}</h2>
         <p>
-          This removes its record from this browser. The current work stays open
-          in memory. Downloaded backups and source files are separate copies and
-          remain on your device.
+          {t(
+            "This removes its record from this browser. The current work stays open in memory. Downloaded backups and source files are separate copies and remain on your device. ",
+          )}
         </p>
         <div className="dialog-actions">
           <button
             className="button secondary"
             onClick={() => deleteDialog.current?.close()}
           >
-            Keep saved project
+            {t("Keep saved project ")}
           </button>
           <button
             className="button primary"
@@ -319,10 +322,10 @@ export function ProjectActions({
               })
             }
           >
-            Delete from this browser
+            {t("Delete from this browser ")}
           </button>
         </div>
-        {error && <p role="alert">{error}</p>}
+        {error && <p role="alert">{t(error)}</p>}
       </dialog>
       <dialog
         ref={exportDialog}
@@ -330,52 +333,55 @@ export function ProjectActions({
         aria-labelledby="export-title"
       >
         <div className="dialog-heading">
-          <h2 id="export-title">Export your review</h2>
+          <h2 id="export-title">{t("Export your review")}</h2>
           <button
             className="button secondary"
             disabled={pending}
             onClick={() => exportDialog.current?.close()}
           >
-            Close
+            {t("Close ")}
           </button>
         </div>
         {totals && (
           <>
             <p>
-              All {rows.toLocaleString()} rows will be exported in their
-              original order, regardless of the current review filter.
+              {t("All ")}
+              {rows.toLocaleString()}{" "}
+              {t(
+                "rows will be exported in their original order, regardless of the current review filter. ",
+              )}
             </p>
             <dl className="export-counts">
               <div>
-                <dt>Approved changes</dt>
+                <dt>{t("Approved changes")}</dt>
                 <dd>{totals.changed}</dd>
               </div>
               <div>
-                <dt>Unresolved findings</dt>
+                <dt>{t("Unresolved findings")}</dt>
                 <dd>{totals.unresolved}</dd>
               </div>
               <div>
-                <dt>Failed inspections</dt>
+                <dt>{t("Failed inspections")}</dt>
                 <dd>{totals.failed}</dd>
               </div>
               <div>
-                <dt>Not inspected</dt>
+                <dt>{t("Not inspected")}</dt>
                 <dd>{totals.incomplete}</dd>
               </div>
               <div>
-                <dt>Unreviewed cells</dt>
+                <dt>{t("Unreviewed cells")}</dt>
                 <dd>{totals.unreviewed}</dd>
               </div>
             </dl>
           </>
         )}
         <p>
-          Only approved proposals replace originals, including approved manual
-          replacements. Original findings remain in the report. Other values
-          stay unchanged. This is not a claim that every value is Unicode.
+          {t(
+            "Only approved proposals replace originals, including approved manual replacements. Original findings remain in the report. Other values stay unchanged. This is not a claim that every value is Unicode. ",
+          )}
         </p>
         <fieldset disabled={pending || !!artifact}>
-          <legend>CSV format</legend>
+          <legend>{t("CSV format")}</legend>
           <label>
             <input
               type="radio"
@@ -385,7 +391,7 @@ export function ProjectActions({
                 setExportOptions({ ...exportOptions, spreadsheetSafe: false })
               }
             />{" "}
-            Preserve data values
+            {t("Preserve data values ")}
           </label>
           <label>
             <input
@@ -396,14 +402,12 @@ export function ProjectActions({
                 setExportOptions({ ...exportOptions, spreadsheetSafe: true })
               }
             />{" "}
-            Spreadsheet-safe escaping
+            {t("Spreadsheet-safe escaping ")}
           </label>
           <p>
-            Spreadsheet-safe escaping adds an apostrophe to values that start
-            with formula characters (including after whitespace), tabs or
-            newlines. It also checks headers. This changes those values; their
-            positions appear in the report. Spreadsheet behavior varies, and
-            re-saving can remove protection.
+            {t(
+              "Spreadsheet-safe escaping adds an apostrophe to values that start with formula characters (including after whitespace), tabs or newlines. It also checks headers. This changes those values; their positions appear in the report. Spreadsheet behavior varies, and re-saving can remove protection. ",
+            )}
           </p>
           <label>
             <input
@@ -413,7 +417,7 @@ export function ProjectActions({
                 setExportOptions({ ...exportOptions, bom: e.target.checked })
               }
             />{" "}
-            Include UTF-8 BOM
+            {t("Include UTF-8 BOM ")}
           </label>
           <label>
             <input
@@ -426,13 +430,14 @@ export function ProjectActions({
                 })
               }
             />{" "}
-            Include original and replacement text for applied changes in the
-            report
+            {t(
+              "Include original and replacement text for applied changes in the report ",
+            )}
           </label>
           <p>
-            The original separator and column names are preserved. CSV
-            formatting may differ; values and embedded line breaks are kept. Use
-            Download original for an identical copy of the source file.
+            {t(
+              "The original separator and column names are preserved. CSV formatting may differ; values and embedded line breaks are kept. Use Download original for an identical copy of the source file. ",
+            )}
           </p>
           {needsAcknowledgement && (
             <label className="export-ack">
@@ -446,18 +451,19 @@ export function ProjectActions({
                   })
                 }
               />{" "}
-              I understand that unresolved, failed or unreviewed cells remain,
-              and approved manual replacements retain their original findings.
+              {t(
+                "I understand that unresolved, failed or unreviewed cells remain, and approved manual replacements retain their original findings. ",
+              )}
             </label>
           )}
         </fieldset>
-        {error && <p role="alert">{error}</p>}
+        {error && <p role="alert">{t(error)}</p>}
         {preparing && (
           <button
             className="button secondary"
             onClick={() => client.current.cancel()}
           >
-            Cancel preparation
+            {t("Cancel preparation ")}
           </button>
         )}
         {!artifact ? (
@@ -483,29 +489,32 @@ export function ProjectActions({
               })
             }
           >
-            {pending ? "Preparing…" : "Prepare export"}
+            {pending ? t("Preparing…") : t("Prepare export")}
           </button>
         ) : (
           <>
             <p>
-              {artifact.escaped.length} values received spreadsheet escaping.
-              The report lists every affected row and column.
+              {artifact.escaped.length}{" "}
+              {t(
+                "values received spreadsheet escaping. The report lists every affected row and column. ",
+              )}
             </p>
             {artifact.escaped.length > 0 && (
               <details>
-                <summary>See affected values</summary>
+                <summary>{t("See affected values")}</summary>
                 <ul>
                   {artifact.escaped.slice(0, 25).map((item) => (
                     <li key={`${item.row}:${item.column}`}>
-                      {item.header ? "Header" : `Row ${item.row}`} · Column{" "}
-                      {item.column}
+                      {item.header ? t("Header") : `Row ${item.row}`}{" "}
+                      {t("· Column")} {item.column}
                     </li>
                   ))}
                 </ul>
                 {artifact.escaped.length > 25 && (
                   <p>
-                    Showing the first 25 positions. Download the report for the
-                    complete list.
+                    {t(
+                      "Showing the first 25 positions. Download the report for the complete list. ",
+                    )}
                   </p>
                 )}
               </details>
@@ -515,7 +524,7 @@ export function ProjectActions({
                 className="button secondary"
                 onClick={() => download(artifact.report, "review-report.json")}
               >
-                Download report
+                {t("Download report ")}
               </button>
               <button
                 className="button primary"
@@ -528,7 +537,7 @@ export function ProjectActions({
                   )
                 }
               >
-                Download CSV
+                {t("Download CSV ")}
               </button>
             </div>
           </>

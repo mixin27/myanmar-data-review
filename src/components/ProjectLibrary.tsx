@@ -1,3 +1,4 @@
+import { useI18n } from "../i18n";
 import { useEffect, useRef, useState } from "react";
 import { ProjectClient } from "../project/client";
 import type { ProjectSnapshot } from "../project/contracts";
@@ -15,6 +16,8 @@ export function ProjectLibrary({
   onOpen: (project: OpenedProject) => Promise<void>;
   hasFile: boolean;
 }) {
+  const { t } = useI18n();
+
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
   const [listed, setListed] = useState(false);
   const [error, setError] = useState("");
@@ -28,7 +31,9 @@ export function ProjectLibrary({
     if (
       hasFile &&
       !window.confirm(
-        "Opening this project closes the current work. Any changes since your last save will be lost. Continue?",
+        t(
+          "Opening this project closes the current work. Any changes since your last save will be lost. Continue?",
+        ),
       )
     )
       return;
@@ -62,7 +67,7 @@ export function ProjectLibrary({
         className="text-button"
         onClick={() => dialog.current?.showModal()}
       >
-        Projects & backups
+        {t("Projects & backups ")}
       </button>
       <dialog
         ref={dialog}
@@ -70,18 +75,19 @@ export function ProjectLibrary({
         aria-labelledby="library-title"
       >
         <div className="dialog-heading">
-          <h2 id="library-title">Your projects</h2>
+          <h2 id="library-title">{t("Your projects")}</h2>
           <button
             className="button secondary"
             disabled={busy}
             onClick={() => dialog.current?.close()}
           >
-            Close
+            {t("Close ")}
           </button>
         </div>
         <p>
-          Projects saved in this browser stay on this device. Open a backup as a
-          new unsaved project; nothing runs or saves automatically.
+          {t(
+            "Projects saved in this browser stay on this device. Open a backup as a new unsaved project; nothing runs or saves automatically. ",
+          )}
         </p>
         <div className="action-group">
           <button
@@ -101,14 +107,14 @@ export function ProjectLibrary({
                 );
             }}
           >
-            Show saved projects
+            {t("Show saved projects ")}
           </button>
           <button
             className="button secondary"
             disabled={busy}
             onClick={() => backup.current?.click()}
           >
-            Open backup
+            {t("Open backup ")}
           </button>
         </div>
         <input
@@ -116,7 +122,7 @@ export function ProjectLibrary({
           className="sr-only"
           type="file"
           accept=".json"
-          aria-label="Choose project backup"
+          aria-label={t("Choose project backup")}
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) void restore(file, null);
@@ -124,14 +130,17 @@ export function ProjectLibrary({
           }}
         />
         {listed && projects.length === 0 && (
-          <p>No projects saved in this browser yet.</p>
+          <p>{t("No projects saved in this browser yet.")}</p>
         )}
         <ul className="project-list">
           {projects.map((project) => (
             <li key={project.id}>
               <div>
                 <strong>{project.name}</strong>
-                <p>Saved {new Date(project.updatedAt).toLocaleString()}</p>
+                <p>
+                  {t("Saved ")}
+                  {new Date(project.updatedAt).toLocaleString()}
+                </p>
               </div>
               <button
                 className="button secondary"
@@ -156,25 +165,25 @@ export function ProjectLibrary({
                     );
                 }}
               >
-                Open saved project
+                {t("Open saved project ")}
               </button>
             </li>
           ))}
         </ul>
         {busy && (
           <>
-            <p role="status">Opening project…</p>
+            <p role="status">{t("Opening project…")}</p>
             {preparing && (
               <button
                 className="button secondary"
                 onClick={() => client.current.cancel()}
               >
-                Stop opening
+                {t("Stop opening ")}
               </button>
             )}
           </>
         )}
-        {error && <p role="alert">{error}</p>}
+        {error && <p role="alert">{t(error)}</p>}
       </dialog>
     </>
   );

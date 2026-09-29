@@ -1550,3 +1550,112 @@ thead .chosen-column {
     top: -1rem;
   }
 }
+
+.review-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  padding: 1.25rem;
+  align-items: end;
+  border-bottom: 1px solid var(--border);
+}
+.review-filters label {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.review-filters input,
+.review-filters select {
+  width: 100%;
+  min-width: 0;
+  padding: 0.65rem;
+}
+.review-filters form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: end;
+  grid-column: span 2;
+}
+.cell-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+.cell-navigation span {
+  font-size: 0.875rem;
+}
+.duplicate-review {
+  padding: 1rem 0;
+  border-top: 1px solid #dce4d7;
+}
+.diff-removed {
+  background: #ffe2df;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+.diff-added {
+  background: #daf0cd;
+  text-decoration: underline;
+  text-decoration-style: double;
+}
+.language-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+html[lang="my"] {
+  line-height: 1.85;
+}
+@media (max-width: 540px) {
+  .review-filters form {
+    grid-column: auto;
+    flex-wrap: wrap;
+  }
+}
+
+.app-header {
+  height: auto;
+  min-height: 82px;
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+.language-picker select {
+  padding: 0.45rem;
+  max-width: 10rem;
+}
+html[lang="my"] button,
+html[lang="my"] select,
+html[lang="my"] h1,
+html[lang="my"] h2,
+html[lang="my"] h3 {
+  line-height: 1.8;
+}
+
+.review-filters input,
+.review-filters select {
+  border: 1px solid #cbd5ca;
+  border-radius: 8px;
+  background: #fff;
+  min-height: 2.7rem;
+}
+.review-filters input[type="number"] {
+  min-width: 6rem;
+}
+.review-help {
+  margin-bottom: 1rem;
+}
+html[lang="my"] p,
+html[lang="my"] .review-help,
+html[lang="my"] .review-scope {
+  line-height: 1.9;
+}
+@media (max-width: 700px) {
+  .review-progress {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

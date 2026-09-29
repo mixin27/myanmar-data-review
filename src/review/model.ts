@@ -39,6 +39,16 @@ export interface BulkSnapshot {
   readonly generation: number;
   readonly targets: readonly Readonly<{ id: string; revision: number }>[];
 }
+export interface DuplicateSnapshot {
+  readonly generation: number;
+  readonly sourceId: string;
+  readonly decision: "approved" | "rejected";
+  readonly targets: readonly {
+    id: string;
+    revision: number | null;
+    decision: Decision;
+  }[];
+}
 export function unresolved(cell: ReviewCell): boolean {
   return (
     !!cell.result?.unresolvedReason ||
@@ -77,6 +87,81 @@ export function selectedValue(cell: ReviewCell): string {
 export class ReviewModel {
   private cells = new Map<string, ReviewCell>();
   private proposalRevision = 0;
+  // Session-only undo: bounded by actions and retained text, never serialized.
+  private history: ReviewCell[][] = [];
+  private remember(cells: ReviewCell[]) {
+    this.history.push(cells);
+    const size = () =>
+      this.history.reduce(
+        (sum, entry) =>
+          sum +
+          entry.reduce(
+            (n, cell) => n + (cell.proposal?.text.length ?? 0) + 128,
+            0,
+          ),
+        0,
+      );
+    while (this.history.length > 50 || size() > 2_000_000) this.history.shift();
+  }
+  get canUndo() {
+    return this.history.length > 0;
+  }
+  undo() {
+    const previous = this.history.pop();
+    if (!previous) throw new Error("There is no review action to undo.");
+    for (const cell of previous)
+      this.set(cell.id, {
+        proposal: cell.proposal,
+        decision: cell.decision,
+        approvalRevision: cell.approvalRevision,
+      });
+  }
+  duplicateSnapshot(
+    id: string,
+    decision: "approved" | "rejected",
+  ): DuplicateSnapshot {
+    const source = this.get(id);
+    return {
+      generation: this.generation,
+      sourceId: id,
+      decision,
+      targets: this.all()
+        .filter(
+          (cell) =>
+            cell.column === source.column &&
+            cell.original === source.original &&
+            cell.processing !== "running" &&
+            cell.processing !== "not_run" &&
+            (decision === "rejected"
+              ? cell.decision !== "rejected"
+              : eligible(cell) &&
+                eligible(source) &&
+                cell.proposal?.text === source.proposal?.text),
+        )
+        .map((cell) => ({
+          id: cell.id,
+          revision: cell.proposal?.revision ?? null,
+          decision: cell.decision,
+        })),
+    };
+  }
+  decideDuplicates(snapshot: DuplicateSnapshot) {
+    const current = this.duplicateSnapshot(
+      snapshot.sourceId,
+      snapshot.decision,
+    );
+    if (
+      !snapshot.targets.length ||
+      snapshot.generation !== this.generation ||
+      JSON.stringify(current) !== JSON.stringify(snapshot)
+    )
+      throw new Error(
+        "The selected changes have changed. Review the selection again.",
+      );
+    this.remember(snapshot.targets.map((target) => this.get(target.id)));
+    for (const target of snapshot.targets)
+      this.decide(target.id, snapshot.decision, false);
+  }
   generation = 0;
   settings: Settings = inspectionSettings;
   engineIdentity = "";
@@ -132,6 +217,7 @@ export class ReviewModel {
     this.cells.set(id, { ...this.get(id), ...patch });
   }
   begin(settings: Settings, engineIdentity: string): number {
+    this.history = [];
     this.generation++;
     this.settings = { ...settings };
     this.engineIdentity = engineIdentity;
@@ -183,6 +269,7 @@ export class ReviewModel {
       });
   }
   stop() {
+    this.history = [];
     this.generation++;
     for (const cell of this.cells.values())
       if (cell.processing === "running" || cell.processing === "not_run")
@@ -197,6 +284,7 @@ export class ReviewModel {
       Array.from(text).some((character) => /^[\uD800-\uDFFF]$/u.test(character))
     )
       throw new Error("Enter valid text with at most 100,000 characters.");
+    this.remember([cell]);
     this.set(id, {
       proposal:
         text === cell.original
@@ -206,7 +294,7 @@ export class ReviewModel {
       approvalRevision: null,
     });
   }
-  decide(id: string, decision: Decision) {
+  decide(id: string, decision: Decision, record = true) {
     const cell = this.get(id);
     if (cell.processing === "running" || cell.processing === "not_run")
       throw new Error("Wait for inspection before reviewing.");
@@ -217,17 +305,23 @@ export class ReviewModel {
           (unresolved(cell) || cell.processing !== "succeeded")))
     )
       throw new Error("This proposal needs a manual review before approval.");
+    if (record) this.remember([cell]);
     this.set(id, {
       decision,
       approvalRevision:
         decision === "approved" ? cell.proposal!.revision : null,
     });
   }
-  snapshot(queue: Queue): BulkSnapshot {
+  snapshot(queue: Queue, ids?: ReadonlySet<string>): BulkSnapshot {
     return {
       generation: this.generation,
       targets: this.all()
-        .filter((cell) => matches(cell, queue) && eligible(cell))
+        .filter(
+          (cell) =>
+            matches(cell, queue) &&
+            eligible(cell) &&
+            (!ids || ids.has(cell.id)),
+        )
         .map((cell) => ({ id: cell.id, revision: cell.proposal!.revision })),
     };
   }
@@ -247,6 +341,8 @@ export class ReviewModel {
       throw new Error(
         "The selected changes have changed. Review the selection again.",
       );
-    for (const target of snapshot.targets) this.decide(target.id, "approved");
+    this.remember(snapshot.targets.map((target) => this.get(target.id)));
+    for (const target of snapshot.targets)
+      this.decide(target.id, "approved", false);
   }
 }

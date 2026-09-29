@@ -1,7 +1,7 @@
 # Myanmar Data Review — product and implementation plan
 
-Status: local milestones and static-preview checkpoint committed through `2496109`.
-Current priority: portable local-only hosting preparation for DigitalOcean/AWS.
+Status: local milestones and portable-container preparation committed through `19bcba5`.
+Current priority: local review productivity and a Myanmar-language interface.
 The user reports an existing Vercel deployment; it has not been inspected or changed.
 API/authentication remain deferred. New deployment or release approval is not implied.
 
@@ -13,8 +13,8 @@ Demand and real-world usability still need validation with prospective users.
 ## Confirmed decisions
 
 - Separate repository: github.com/mixin27/myanmar-data-review.
-- Latest priority: defer API mode and authentication; finish automated local-product
-  validation. No independent testers are available. Owner feedback is useful but
+- Latest priority: defer API mode and authentication; add local review productivity
+  and a Myanmar-language interface. Outstanding release checks remain required. No independent testers are available. Owner feedback is useful but
   does not replace independent usability or linguistic validation.
 - No automatic switching or fallback between execution modes.
 - Unicode is the only conversion target in v1. Inspect first; conversion is
@@ -34,7 +34,7 @@ Demand and real-world usability still need validation with prospective users.
   Milestone two was committed as `eaf8b57` at the user’s request. Milestone three
   was committed as `e504858`. Milestone four was committed as `4072a8a`.
   Hardening checkpoint was committed as `da181d9`. API/auth was discussed, then deferred again.
-  Current work is local-only technical validation. No deployment, package publication, push
+  Current work is local-only product enhancements. No deployment, package publication, push
   or GitHub settings change is authorized.
 - All product UI copy must be end-user focused. Remove developer status screens,
   raw JSON, build identities and worker terminology from production. Design for a
@@ -696,11 +696,73 @@ and linguistic validation. These have not been replaced by synthetic test result
 5. Implement safe exports, reports, explicit save/resume, and portable backups.
 6. Benchmark, verify failure recovery/accessibility, document limits, and conduct
    user validation before claiming production readiness.
-7. API/authentication are deferred. Finish feasible automated local checks and
-   document unavailable human/device checks before a separately authorized preview.
+7. Add the authorized search/filter, navigation/diff, undo, duplicate-decision and
+   Myanmar-interface features. API/authentication remain deferred. Unavailable
+   human/device/hosted checks remain requirements before a release claim.
 
 The user need not purchase a domain, provision hosting, publish packages, or supply
-production credentials. Current work is local technical validation. Firefox, screen-reader,
+production credentials. Current work is local review enhancements. Firefox, screen-reader,
 Safari/iOS, lower-memory devices, real-user and hosted-CI checks remain outstanding
 unless fresh evidence is recorded. No deployment, publication, commit, push or MyanLex
 modification is authorized. A preview does not claim full production readiness.
+
+## Local review enhancements — authorized 2026-09-29
+
+The user approved all five additions. Release validation remains outstanding;
+this is a development-priority change, not release approval.
+
+1. Search original/proposed values, combine column/finding/decision filters, and
+   jump to a source row. Filters never change export scope. Bulk approval freezes
+   only eligible cells in the current filtered view.
+2. Previous/next cell navigation within the filtered queue, modifier-key shortcuts,
+   and grapheme-aware changed-range highlighting. Text-editing shortcuts remain native.
+3. Session-only undo of manual proposals and decisions, including atomic bulk actions.
+   Retain at most 50 actions and two million estimated text/code units; clear on
+   reinspection, cancellation or restore. Undo is not saved in project backups.
+4. Confirm decisions for exact original values in the same column. Approving matches
+   requires identical eligible engine proposals; manual/unresolved proposals remain
+   excluded. Keeping originals preserves all findings. Freeze and validate the whole
+   selection; never apply a partially stale group. Each group is one undo action.
+5. English/Myanmar interface selection, without translating source data, column
+   names or filenames. Language choice is session-only. Translation quality still
+   needs independent native-speaker validation.
+
+Implemented:
+
+- Combined filters, row jump, filtered bulk approval, filtered cell navigation with
+  Alt+P/Alt+N and protection for unproposed replacement drafts.
+- Grapheme-aware visual comparison; session-only bounded undo restores proposal
+  revisions and approvals. Very large actions can clear undo history, disclosed in UI.
+- Confirmed same-column exact-value groups with atomic validation and undo. Manual
+  approvals remain individual; source values and original findings are preserved.
+- English/Myanmar controls, explanatory copy, accessible labels and document language.
+  Language switches preserve data/decisions, issue no processing requests and perform
+  no storage writes. No new dependency, remote font or engine/artifact change.
+- Responsive input/header/progress spacing and translated-text line height. Some
+  exceptional lower-level file/storage errors still fall back to English; independent
+  native-speaker translation review is outstanding. This is not linguistic validation.
+- Added `docs/REVIEW_TOOLS.md` with controls, safeguards and undo/translation limits.
+
+Verification — completed 2026-09-30:
+
+- `pnpm check` passed: generated types, lint, both typechecks, 100 unit tests,
+  production build/worker separation and isolated installed MyanLex consumer.
+- `pnpm test:browser --project=chromium --project=webkit`: all 68 tests passed.
+  Added tests cover filters/row navigation, exact-value decisions and undo,
+  changed-range reconstruction, revision and stale-selection safeguards, Myanmar
+  import/review, draft navigation, language-switch data preservation and no automatic
+  storage/network traffic. Desktop/narrow layouts were exercised with synthetic data.
+- `pnpm test:production --project=chromium --project=webkit`: all six checks passed
+  against the security-header preview, including local review/export/save and
+  blocked script-driven network connections. This does not verify a deployed host.
+- `pnpm test:browser --project=firefox --max-failures=1`: failed before application
+  execution with “Could not find profile folder.” One launch failed; 33 tests did
+  not run. The default Firefox suite remains enabled; no Firefox pass is claimed.
+- Formatting and diff checks passed. No new dependency, MyanLex modification,
+  commit, deployment or publication. Full fresh-checkout/hosted-CI and cloud/container
+  release checks were not rerun for this feature milestone.
+- Screen-reader, shipping Safari/iOS, physical low-memory devices, independent user
+  and linguistic/translation validation remain outstanding release requirements.
+  API/authentication remain deferred. Next milestone: address release verification
+  and translation/error-message coverage without treating these feature checks as
+  production-release approval.

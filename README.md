@@ -199,3 +199,6 @@ a production server or a deployment. Host/CDN headers must be configured separat
 For a DigitalOcean Droplet or AWS EC2, see [portable Docker hosting](deployment/README.md).
 This alternative leaves the existing Vercel deployment unchanged. Prepare with
 `pnpm container:prepare`, then use `compose.local.yaml` for localhost verification.
+
+For search, keyboard navigation, undo, matching-value decisions and the Myanmar
+interface, see [Review tools](docs/REVIEW_TOOLS.md).
