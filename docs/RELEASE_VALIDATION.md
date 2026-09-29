@@ -66,3 +66,36 @@ physical mobile-device test or production readiness claim is implied by local te
 Dependency and browser versions are pinned by the lockfile/Playwright installation.
 Configuration follows the official [Playwright browser guide](https://playwright.dev/docs/browsers);
 keyboard checks follow its [keyboard API](https://playwright.dev/docs/api/class-keyboard).
+
+## Current Firefox environment blocker
+
+On macOS 27.0, the pinned Firefox 155 / Playwright revision 1543 still exits before
+loading this app with `Could not find profile folder`. The symptom and OS match
+[Playwright issue 42768](https://github.com/microsoft/playwright/issues/42768) and
+[Mozilla bug 2062988](https://bugzilla.mozilla.org/show_bug.cgi?id=2062988), which
+identify app-data/profile startup access problems on macOS. This is supporting
+evidence, not proof of this machine's exact permission state. Moving only the
+profile to `/private/tmp` did not fix the previous reproduction.
+
+Do not disable Firefox, modify the browser binary or weaken macOS privacy settings
+just to get passing tests. Run the unchanged suite on a supported Linux environment
+or an upstream-fixed browser version once available and verified. Docker is installed
+locally but its daemon was unavailable during this validation; no Linux run is claimed.
+Hosted Ubuntu CI already includes Firefox but still needs an authorized push.
+
+## Owner-only preview check (no testing team required)
+
+Run `pnpm dev` and use a copy of your own CSV. Complete these steps:
+
+1. Choose only the text columns you intend to inspect.
+2. Inspect without conversion. A finding with no proposed change is allowed;
+   uncertain encoding does not prove that the text is incorrect.
+3. Enable Unicode conversion, start a new review and approve one eligible change.
+4. Export and compare the changed value and an untouched identifier in another CSV
+   viewer. Keep the original file; spreadsheet escaping intentionally changes values.
+5. Download a backup, reload, open the backup and verify the approval is retained.
+
+If something is confusing, record the button/step and what you expected. Screenshots
+are optional; hide sensitive text before sharing. Owner observations are useful
+feedback but do not count as independent testing or linguistic validation. Do not
+claim screen-reader or physical-device coverage from automated viewport tests.

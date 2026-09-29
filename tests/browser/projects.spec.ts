@@ -405,3 +405,42 @@ test("project-file timeout releases the worker and explicit retry succeeds", asy
   );
   expect(await page.evaluate(() => indexedDB.databases())).toEqual([]);
 });
+
+test("a blocked storage open closes its late connection and allows explicit retry", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Projects & backups" }).click();
+  await page.getByRole("button", { name: "Show saved projects" }).click();
+  await expect(
+    page.getByText("No projects saved in this browser yet."),
+  ).toBeVisible();
+  await page.evaluate(() => {
+    const original = indexedDB.open.bind(indexedDB);
+    const close = IDBDatabase.prototype.close;
+    Object.assign(window, { lateClosed: false });
+    IDBDatabase.prototype.close = function () {
+      Object.assign(window, { lateClosed: true });
+      return close.call(this);
+    };
+    indexedDB.open = (...args: Parameters<typeof indexedDB.open>) => {
+      indexedDB.open = original;
+      const request = original(...args);
+      // Emulate an upgrade blocker disappearing after the UI has reported it.
+      queueMicrotask(() => request.dispatchEvent(new Event("blocked")));
+      return request;
+    };
+  });
+  await page.getByRole("button", { name: "Show saved projects" }).click();
+  await expect(page.getByRole("alert")).toContainText(
+    "Saved projects could not be read",
+  );
+  await expect
+    .poll(() => page.evaluate(() => Reflect.get(window, "lateClosed")))
+    .toBe(true);
+  await page.getByRole("button", { name: "Show saved projects" }).click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(
+    page.getByText("No projects saved in this browser yet."),
+  ).toBeVisible();
+});

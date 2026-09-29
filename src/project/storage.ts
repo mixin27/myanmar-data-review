@@ -44,8 +44,13 @@ export async function acquireWriter(id: string): Promise<WriterLease> {
 }
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
+    let blocked = false;
     const request = indexedDB.open("myanmar-review-projects", 2);
     request.onupgradeneeded = () => {
+      if (blocked) {
+        request.transaction?.abort();
+        return;
+      }
       const db = request.result;
       if (!db.objectStoreNames.contains("projects"))
         db.createObjectStore("projects", { keyPath: "id" });
@@ -74,10 +79,16 @@ function openDatabase(): Promise<IDBDatabase> {
           "Device storage is unavailable or uses a newer version. Download a backup instead.",
         ),
       );
-    request.onblocked = () =>
+    request.onblocked = () => {
+      blocked = true;
       reject(new Error("Close other tabs using this app, then try again."));
+    };
     request.onsuccess = () => {
       const db = request.result;
+      if (blocked) {
+        db.close();
+        return;
+      }
       db.onversionchange = () => db.close();
       resolve(db);
     };

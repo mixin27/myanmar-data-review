@@ -1,7 +1,8 @@
 # Myanmar Data Review — product and implementation plan
 
-Status: milestones one through four committed. Release hardening is in progress.
-Hosted CI and independent operator/accessibility verification remain pending.
+Status: local milestones and hardening checkpoint committed through `da181d9`.
+Local-only technical validation is the current priority. API mode/authentication
+are deferred again at the user’s request; no production release is approved.
 
 This is a standalone product consuming MyanLex, not another developer playground.
 Its purpose is to help one operator review legacy Myanmar text in CSV records,
@@ -11,8 +12,9 @@ Demand and real-world usability still need validation with prospective users.
 ## Confirmed decisions
 
 - Separate repository: github.com/mixin27/myanmar-data-review.
-- First release: local-only processing. Optional API execution is deferred to a
-  later release and its separate authentication/funding design gate.
+- Latest priority: defer API mode and authentication; finish automated local-product
+  validation. No independent testers are available. Owner feedback is useful but
+  does not replace independent usability or linguistic validation.
 - No automatic switching or fallback between execution modes.
 - Unicode is the only conversion target in v1. Inspect first; conversion is
   explicitly enabled and NFC normalization defaults to off. Manual per-cell
@@ -30,7 +32,8 @@ Demand and real-world usability still need validation with prospective users.
 - Milestone one was authorized and committed at the user's request as `92d0a98`.
   Milestone two was committed as `eaf8b57` at the user’s request. Milestone three
   was committed as `e504858`. Milestone four was committed as `4072a8a`.
-  Release hardening is now authorized. No deployment, package publication, push
+  Hardening checkpoint was committed as `da181d9`. API/auth was discussed, then deferred again.
+  Current work is local-only technical validation. No deployment, package publication, push
   or GitHub settings change is authorized.
 - All product UI copy must be end-user focused. Remove developer status screens,
   raw JSON, build identities and worker terminology from production. Design for a
@@ -105,7 +108,8 @@ uses native controls; shadcn components and full product theming remain later UI
 
 Keep product domain types and review transitions independent of the UI. Suggested
 boundaries: CSV import/export, review domain, local execution adapter,
-device storage, and UI. Add the API adapter only in the later API release.
+device storage, and UI. Preserve Vite and independent workers; the API adapter
+is deferred and requires a renewed implementation request.
 A virtualized table displays a bounded portion of the data;
 parsing and language processing must not run as long main-thread tasks.
 
@@ -134,10 +138,16 @@ and 1,000,000 aggregate UTF-8 text bytes. Respect these and the HTTP body limit;
 chunking must preserve stable row/column identities. Product resource limits may
 be lower. Benchmark before selecting concurrency and cancellation deadlines.
 
-## 4. Optional API processing — deferred, outside the first release
+## 4. Optional API processing — deferred again
 
-The requirements below are constraints for a future release, not first-release
-acceptance gates. V1 has no API mode selector, server adapter, sign-in, or quota UI.
+The user considered and approved separate Data Review accounts, an operator-funded
+MyanLex project and a production-oriented portable Docker direction, then explicitly
+deferred API/authentication to focus on the local product. No API/auth runtime was
+implemented. Preserve [the historical proposal](docs/API_MODE_PROPOSAL.md) as design
+context only; its SQLite recommendation was superseded by PostgreSQL/Redis discussion.
+Any revival needs renewed scope and admission/deployment design review.
+
+The following constraints apply only if API work is resumed:
 
 - Mode selection sends nothing. A separate Run confirmation identifies selected
   columns/cells, destination, and the fact that their text leaves the device.
@@ -147,9 +157,9 @@ acceptance gates. V1 has no API mode selector, server adapter, sign-in, or quota
   Never embed operator API keys in browser bundles or saved projects.
 - API mode requires authenticated, authorized users and bounded admission before
   spending an operator/project allowance. Anonymous users retain local mode only.
-- Authentication and key ownership are an open design gate: choose between an
-  operator-funded service and supported user/project delegation before implementing
-  API mode. Do not assume MyanLex already supports external-app SSO or delegated
+- Historical direction: separate accounts and an operator-funded project, with
+  server authorization and per-user/global limits. Renew implementation scope before
+  proceeding. Do not assume MyanLex already supports external-app SSO or delegated
   API access. Do not build new upstream auth APIs without explicit scope approval.
 - No implicit retries after ambiguous timeouts. Cancellation may not stop admitted
   server work or refund quota. Show partial results and uncertain completion clearly.
@@ -217,8 +227,8 @@ Acceptance gates:
   concurrent tabs, and malformed/version-incompatible project backups.
 - Export tests prove only approved changes are applied and complete data is retained.
 - V1 verifies local worker results against direct execution of the matching build.
-  Local/API parity and auth/quota/outage tests belong to the later API release,
-  using isolated services once its integration model is approved.
+  Local/API parity and auth/quota/outage tests are deferred with API mode,
+  using isolated local services once its integration model is approved.
 - Fresh-checkout CI generates framework types before typechecking, then runs lint,
   tests, production builds, worker checks, and package-consumer integration tests.
 - Use automated DOM/keyboard tests. Do not use computer-use tools unless requested.
@@ -228,7 +238,8 @@ Acceptance gates:
 
 These implementation defaults make the remaining behavior concrete and remain
 open to revision. Explicit user decisions are recorded separately above. The current
-implementation authorization covers milestones one through five, not the deferred API release.
+implementation authorization covers local technical validation. API/authentication
+are deferred; this priority change does not approve a release.
 
 - **Application:** React + TypeScript + Vite, with the proposed shadcn/ui and
   Tailwind approach. Build a static browser application with worker-based local
@@ -591,6 +602,30 @@ an authorized push, shipping Safari/iOS and physical low-memory devices, precise
 worker-inclusive peak-memory profiling, screen-reader checks and independent operator
 and linguistic validation. These have not been replaced by synthetic test results.
 
+## Local-only validation follow-up
+
+- API/authentication deferred again by explicit user direction. Historical account,
+  operator-funding and Docker discussions do not authorize current API work.
+- Fixed late IndexedDB connections after a blocked open: close a late success and
+  abort a late upgrade after reporting failure. An automated regression emulates
+  the blocked/late-success sequence and verifies explicit retry in both engines.
+- `pnpm check` passed: 91 tests, lint, typechecks, production build, generated
+  identities and isolated MyanLex artifact consumer. Formatting/diff checks passed.
+- `pnpm test:browser --project=chromium --project=webkit`: 62 tests passed, including
+  no-upload/no-automatic-storage guards, keyboard/layout, export and recovery tests.
+  Large synthetic cases remain within existing bounds; no capacity limits were raised.
+- Firefox was reproduced with `--max-failures=1`: one launch failure and one test
+  not run, before application startup. The macOS 27.0 symptom matches upstream
+  Playwright issue 42768 / Mozilla bug 2062988; exact local permission cause is not
+  proven. Firefox stays enabled in default tests and CI. Docker's daemon was not
+  running, so no alternative Linux or full clean all-browser run is claimed.
+- Added an owner-only walkthrough and documented the Firefox evidence in
+  `docs/RELEASE_VALIDATION.md`. Lack of independent testers does not block continued
+  engineering, but independent usability/linguistic validation remains outstanding.
+- No new runtime dependencies, upstream modification, deployment, commit or push.
+  Screen readers, shipping Safari/iOS, physical lower-memory devices, real-user
+  validation and hosted CI remain open. No production-readiness claim is made.
+
 ## Delivery sequence
 
 1. On a follow-up implementation request, use the confirmed local-only,
@@ -603,10 +638,11 @@ and linguistic validation. These have not been replaced by synthetic test result
 5. Implement safe exports, reports, explicit save/resume, and portable backups.
 6. Benchmark, verify failure recovery/accessibility, document limits, and conduct
    user validation before claiming production readiness.
-7. In a separately scoped later release, implement optional authenticated API
-   execution after its design gate is resolved.
+7. API/authentication are deferred. Finish feasible automated local checks and
+   document unavailable human/device checks before a separately authorized preview.
 
 The user need not purchase a domain, provision hosting, publish packages, or supply
-production credentials. The next milestone is release hardening: cross-browser
-accessibility and resource verification, recovery/limits documentation and operator
-validation of the complete import-to-export workflow.
+production credentials. Current work is local technical validation. Firefox, screen-reader,
+Safari/iOS, lower-memory devices, real-user and hosted-CI checks remain outstanding
+unless fresh evidence is recorded. No deployment, publication, commit, push or MyanLex
+modification is authorized. A preview does not claim full production readiness.

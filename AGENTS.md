@@ -11,8 +11,10 @@ change GitHub settings without explicit authorization.
   notices before changing integration. Report necessary upstream changes.
 - Reuse @myanlex/application through public exports; engine dependencies are
   @myanlex/core and @myanlex/types. Never copy linguistic algorithms.
-- No private playground package, internal playground endpoints, SDK/API runtime,
-  sibling-source imports, workspace links, or machine-specific dependencies.
+- No private playground package, internal playground endpoints, sibling-source
+  imports, workspace links, or machine-specific dependencies. API mode is deferred. Any future implementation needs renewed scope approval
+  and must use public HTTP contracts through a narrowly scoped backend.
+  SDK use requires reproducibly pinned artifacts; never browser operator keys.
 - Consume the immutable archives in vendor/myanlex. Preserve source commit,
   checksums, build identity, MIT/Apache licenses and third-party notices.
 - Artifact updates use scripts/package-myanlex.py in an isolated temporary build.
@@ -30,9 +32,16 @@ change GitHub settings without explicit authorization.
 
 ## Scope and verification
 
-Current milestone: release hardening, including cross-browser tests, accessibility,
-resource measurements and recovery documentation. Import, review, exports and
-explicit save/resume are complete. Authentication and API execution remain deferred.
+Current priority: technical validation of the local-only product. API mode and
+authentication are deferred again at the user's request; the proposal is historical,
+not authorization to implement. Preserve anonymous Vite/worker processing without
+a backend. No processing network traffic or automatic persistence.
+
+Keep Firefox enabled and report environmental startup failures honestly. Screen-reader,
+shipping Safari/iOS, physical low-memory devices, independent real-user validation
+and hosted CI remain outstanding until actually verified. Automated checks and the
+owner's feedback support a preview, not a claim of independent usability or linguistic
+validation. No deployment, publication, commit or push is authorized this turn.
 
 Keep processing state separate from review decisions and diagnostic resolution.
 Approvals bind to proposal revisions; settings, content or engine changes invalidate

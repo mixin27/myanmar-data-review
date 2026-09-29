@@ -172,9 +172,9 @@ round-trip and arbitrary chunk-boundary tests. No dependencies were added for
 milestone two. Native controls and semantic tables support the tailored interface.
 
 Chromium and WebKit desktop/narrow workflows are tested on macOS ARM64. Firefox
-verification is blocked locally: its installed browser exits before launch with
-“Could not find profile folder,” including when using `/private/tmp`. The full suite
-keeps Firefox enabled so this failure remains visible. To run the available engines:
+verification is blocked locally on macOS 27.0: its installed browser exits before launch with
+“Could not find profile folder,” including when using `/private/tmp`. The symptom matches an upstream startup issue; see the release guide for evidence.
+The full suite keeps Firefox enabled so this failure remains visible. To run the available engines:
 `pnpm test:browser --project=chromium --project=webkit`.
 Shipping Safari/iOS, screen readers, lower-powered devices and hosted Ubuntu CI
 remain unverified. Synthetic tests and engine parity do not establish linguistic accuracy.
