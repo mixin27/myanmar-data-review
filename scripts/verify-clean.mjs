@@ -33,6 +33,7 @@ try {
     ["format:check"],
     ["check"],
     ["test:browser"],
+    ["test:production"],
   ])
     execFileSync("pnpm", args, {
       cwd: project,

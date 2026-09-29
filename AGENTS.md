@@ -32,7 +32,7 @@ change GitHub settings without explicit authorization.
 
 ## Scope and verification
 
-Current priority: technical validation of the local-only product. API mode and
+Current priority: local-only validation and static-preview readiness. API mode and
 authentication are deferred again at the user's request; the proposal is historical,
 not authorization to implement. Preserve anonymous Vite/worker processing without
 a backend. No processing network traffic or automatic persistence.
@@ -41,7 +41,9 @@ Keep Firefox enabled and report environmental startup failures honestly. Screen-
 shipping Safari/iOS, physical low-memory devices, independent real-user validation
 and hosted CI remain outstanding until actually verified. Automated checks and the
 owner's feedback support a preview, not a claim of independent usability or linguistic
-validation. No deployment, publication, commit or push is authorized this turn.
+validation. Commit only when requested; deployment, publication and push require
+separate authorization. Apply and test deployment headers on worker assets as well
+as HTML; Vite preview is not a production server.
 
 Keep processing state separate from review decisions and diagnostic resolution.
 Approvals bind to proposal revisions; settings, content or engine changes invalidate

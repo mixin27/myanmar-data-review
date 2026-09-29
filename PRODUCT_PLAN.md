@@ -1,6 +1,6 @@
 # Myanmar Data Review — product and implementation plan
 
-Status: local milestones and hardening checkpoint committed through `da181d9`.
+Status: local milestones and validation checkpoint committed through `65a8d4b`.
 Local-only technical validation is the current priority. API mode/authentication
 are deferred again at the user’s request; no production release is approved.
 
@@ -625,6 +625,30 @@ and linguistic validation. These have not been replaced by synthetic test result
 - No new runtime dependencies, upstream modification, deployment, commit or push.
   Screen readers, shipping Safari/iOS, physical lower-memory devices, real-user
   validation and hosted CI remain open. No production-readiness claim is made.
+
+## Static-preview readiness follow-up
+
+- Committed local-only scope/storage recovery as `65a8d4b` at the user's request.
+- Added a host-neutral security-header policy and a loopback-only secure preview
+  command for `dist/`. The CSP permits bundled same-origin scripts/styles/workers,
+  blocks script-driven connections, inline scripts, embedding and form submission.
+  HTML/non-fingerprinted resources revalidate; hashed JS/CSS use immutable caching.
+  These headers must be configured on the eventual host; they are not embedded in
+  static files, and Vite preview is not a production server.
+- Added a separate production-build Playwright suite using the same three configured
+  engines. It checks response headers/cache/MIME, three worker loads, inspection,
+  export/download, explicit save and an actual blocked network attempt. Default
+  suites still include Firefox. CI and clean verification now include this suite.
+- Added `docs/STATIC_PREVIEW.md` covering HTTPS hosting, immutable assets, updates,
+  rollback/schema compatibility, domain-bound saves, privacy and required host checks.
+  No host is selected or deployed; no server processing or new dependency was added.
+- Verification: `pnpm check` passed with 91 tests, lint/typecheck/build and isolated
+  MyanLex consumption. Six production-policy tests passed in Chromium/WebKit.
+  All 62 existing Chromium/WebKit browser regressions passed. Formatting and diff
+  checks passed. Preview-readiness checkpoint approved for commit by the user.
+- Firefox startup, full fresh-checkout all-browser verification, hosted CI, actual
+  hosting/TLS/CDN responses, screen readers, shipping Safari/iOS, physical low-memory
+  devices and independent user/linguistic validation are not claimed complete.
 
 ## Delivery sequence
 

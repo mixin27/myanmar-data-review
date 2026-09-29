@@ -30,3 +30,4 @@ jobs:
         run: pnpm test:consumer
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:browser
+      - run: pnpm test:production

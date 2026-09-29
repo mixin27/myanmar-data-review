@@ -188,3 +188,10 @@ Milestone-four references: [IndexedDB transactions and version changes](https://
 [Web Locks](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API), and
 [OWASP CSV injection guidance](https://community.owasp.org/attacks/CSV_Injection).
 No new dependency was added for export, storage or backups.
+
+## Static preview preparation
+
+See [static hosting handoff](docs/STATIC_PREVIEW.md). `pnpm test:production` tests
+the real production build with the policy in `deployment/headers.json`. After
+`pnpm build`, use `pnpm preview:secure --port 4174` to try it locally. This is not
+a production server or a deployment. Host/CDN headers must be configured separately.

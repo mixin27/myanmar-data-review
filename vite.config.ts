@@ -2,9 +2,28 @@ import { defineConfig } from "vitest/config";
 import { resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import previewHeaders from "./deployment/headers.json" with { type: "json" };
 
 export default defineConfig(({ mode }) => ({
   plugins: [
+    {
+      name: "static-host-policy-preview",
+      configurePreviewServer(server) {
+        if (mode !== "secure-preview") return;
+        server.middlewares.use((request, response, next) => {
+          for (const [name, value] of Object.entries(previewHeaders))
+            response.setHeader(name, value);
+          const path = request.url?.split("?")[0] ?? "/";
+          response.setHeader(
+            "Cache-Control",
+            /^\/assets\/[^/]+-[\w-]+\.(js|css)$/.test(path)
+              ? "public, max-age=31536000, immutable"
+              : "no-cache",
+          );
+          next();
+        });
+      },
+    },
     react(),
     tailwindcss(),
     {
