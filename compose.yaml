@@ -1,0 +1,27 @@
+name: myanmar-data-review
+services:
+  web:
+    image: ${MDR_IMAGE:?Set MDR_IMAGE to a locally built immutable release tag}
+    environment:
+      SITE_ADDRESS: ${MDR_DOMAIN:?Set MDR_DOMAIN to the domain name only}
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    volumes:
+      - caddy_data:/data
+    mem_limit: 256m
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  caddy_data:

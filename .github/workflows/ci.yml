@@ -31,3 +31,9 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:browser
       - run: pnpm test:production
+      - run: pnpm test:container-package
+      - run: docker compose -f compose.local.yaml up -d --build --wait
+      - run: pnpm test:container
+      - name: Stop local container
+        if: always()
+        run: docker compose -f compose.local.yaml down

@@ -1,8 +1,9 @@
 # Myanmar Data Review — product and implementation plan
 
-Status: local milestones and validation checkpoint committed through `65a8d4b`.
-Local-only technical validation is the current priority. API mode/authentication
-are deferred again at the user’s request; no production release is approved.
+Status: local milestones and static-preview checkpoint committed through `2496109`.
+Current priority: portable local-only hosting preparation for DigitalOcean/AWS.
+The user reports an existing Vercel deployment; it has not been inspected or changed.
+API/authentication remain deferred. New deployment or release approval is not implied.
 
 This is a standalone product consuming MyanLex, not another developer playground.
 Its purpose is to help one operator review legacy Myanmar text in CSV records,
@@ -649,6 +650,39 @@ and linguistic validation. These have not been replaced by synthetic test result
 - Firefox startup, full fresh-checkout all-browser verification, hosted CI, actual
   hosting/TLS/CDN responses, screen readers, shipping Safari/iOS, physical low-memory
   devices and independent user/linguistic validation are not claimed complete.
+
+## Portable Droplet/EC2 preparation
+
+- User reports deployment on Vercel and requests preparation for a DigitalOcean
+  Droplet or AWS EC2. Existing Vercel settings, DNS and cloud resources were not
+  accessed or changed; their security headers/runtime behavior remain unverified.
+- Added a single static Caddy container (official 2.11.4-alpine, pinned multi-platform
+  index digest). Built ARM64 and AMD64 images locally; the AMD64 server version
+  command ran through local emulation. No full native AMD64/cloud browser run claimed.
+- Generated build context contains compiled site/assets/notices only, with SHA-256
+  release manifest outside the web root. Root Docker context excludes everything;
+  `.container` is the intended context. Previous hashed assets can be retained;
+  conflicting contents for the same filename are rejected. No registry publication.
+- Header configuration derives from the same checked JSON policy. Caddy serves
+  missing/private files as 404, rejects POST, preserves JS MIME types and correct
+  immutable-asset/revalidated-HTML caching. No SPA fallback for missing worker URLs.
+- Container runs as UID 10001 with read-only root, bounded resources, no-new-privileges,
+  private health listener and minimal capabilities. Production Compose exposes only
+  80/443 and persists TLS data. Standalone local Compose exposes only loopback 4175.
+  Public-domain configuration validated without requesting a certificate.
+- `pnpm check`: 91 tests, generation/lint/typechecks/build and isolated MyanLex consumer
+  passed. `pnpm test:container --project=chromium --project=webkit`: six browser checks
+  plus route/private-file/method/worker-header assertions passed against actual Caddy.
+  Package isolation, manifest integrity, previous-asset retention and collision
+  rejection checks passed. Final lint/typecheck/format/diff checks passed.
+- CI now includes container packaging, startup and browser checks with cleanup;
+  hosted execution is not claimed. Default browser configuration still includes Firefox.
+- Local test container/network were removed after verification; images/generated
+  context remain for reuse. No deployment, push, commit or MyanLex source modification.
+- `deployment/README.md` covers server setup, provider firewalls, manual image transfer,
+  TLS, Vercel-origin migration, updates and rollback. Real-domain ACME/TLS, cloud
+  firewall/DNS, native server performance, vulnerability audit, Firefox and previously
+  outstanding human/device/hosted-CI checks remain unverified.
 
 ## Delivery sequence
 

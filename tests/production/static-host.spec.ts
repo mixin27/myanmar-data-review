@@ -23,6 +23,7 @@ test("production assets carry security headers and appropriate cache policy", as
 
 test("production CSP permits local review, export and explicit save without processing traffic", async ({
   page,
+  baseURL,
 }) => {
   const errors: string[] = [];
   const workers = new Set<string>();
@@ -36,8 +37,7 @@ test("production CSP permits local review, export and explicit save without proc
     const url = request.url();
     if (
       request.method() !== "GET" ||
-      (!url.startsWith("http://127.0.0.1:4174/") &&
-        !url.startsWith("blob:http://127.0.0.1:4174/"))
+      (!url.startsWith(`${baseURL}/`) && !url.startsWith(`blob:${baseURL}/`))
     )
       network.push(url);
   });

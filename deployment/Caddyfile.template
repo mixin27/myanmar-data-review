@@ -1,0 +1,25 @@
+{
+	admin off
+	persist_config off
+}
+
+{$SITE_ADDRESS} {
+	root * /srv
+	encode zstd gzip
+	# Generated from headers.json; apply to worker assets and error responses too.
+	__HEADERS__
+	@hashed path_regexp hashed ^/assets/[^/]+-[A-Za-z0-9_-]+\.(js|css)$
+	route {
+		header Cache-Control "no-cache"
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
+	}
+	@unsupported not method GET HEAD
+	respond @unsupported 405
+	@private path /.vite/* /.git/* /.env
+	respond @private 404
+	file_server
+}
+
+http://127.0.0.1:9090 {
+	respond /health "ok" 200
+}

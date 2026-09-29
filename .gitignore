@@ -6,3 +6,6 @@ playwright-report/
 *.tsbuildinfo
 .DS_Store
 .test-build/
+
+.container/
+.server.env

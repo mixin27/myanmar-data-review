@@ -32,7 +32,8 @@ change GitHub settings without explicit authorization.
 
 ## Scope and verification
 
-Current priority: local-only validation and static-preview readiness. API mode and
+Current priority: portable static-container preparation for DigitalOcean/AWS.
+The user reports an existing Vercel deployment; leave it unchanged. API mode and
 authentication are deferred again at the user's request; the proposal is historical,
 not authorization to implement. Preserve anonymous Vite/worker processing without
 a backend. No processing network traffic or automatic persistence.

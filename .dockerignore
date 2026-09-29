@@ -1,0 +1,3 @@
+# The repository root is deliberately not a Docker build context.
+# Use: pnpm container:prepare; docker build .container
+**

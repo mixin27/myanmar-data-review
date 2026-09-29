@@ -27,7 +27,10 @@
     "build:integration": "pnpm generate && vite build --mode integration && node scripts/verify-bundle.mjs .test-build",
     "benchmark:browser": "pnpm build:integration && node scripts/benchmark-browser.mjs",
     "preview:secure": "vite preview --host 127.0.0.1 --mode secure-preview",
-    "test:production": "pnpm build && playwright test --config playwright.production.config.ts"
+    "test:production": "pnpm build && playwright test --config playwright.production.config.ts",
+    "container:prepare": "pnpm build && node scripts/prepare-container.mjs",
+    "test:container": "node scripts/verify-container.mjs && playwright test --config playwright.container.config.ts",
+    "test:container-package": "pnpm build && node scripts/test-container-package.mjs"
   },
   "dependencies": {
     "react": "19.3.0",

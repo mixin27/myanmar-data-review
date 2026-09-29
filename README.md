@@ -195,3 +195,7 @@ See [static hosting handoff](docs/STATIC_PREVIEW.md). `pnpm test:production` tes
 the real production build with the policy in `deployment/headers.json`. After
 `pnpm build`, use `pnpm preview:secure --port 4174` to try it locally. This is not
 a production server or a deployment. Host/CDN headers must be configured separately.
+
+For a DigitalOcean Droplet or AWS EC2, see [portable Docker hosting](deployment/README.md).
+This alternative leaves the existing Vercel deployment unchanged. Prepare with
+`pnpm container:prepare`, then use `compose.local.yaml` for localhost verification.

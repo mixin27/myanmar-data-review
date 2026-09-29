@@ -1,0 +1,18 @@
+# Standalone local configuration: never combine with the public-port compose file.
+name: myanmar-data-review-local
+services:
+  web:
+    build: .container
+    image: myanmar-data-review:local
+    environment:
+      SITE_ADDRESS: http://:8080
+    ports:
+      - "127.0.0.1:4175:8080"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+      - /data:rw,noexec,nosuid,size=16m,uid=10001,gid=10001
+    mem_limit: 256m
+    pids_limit: 100
