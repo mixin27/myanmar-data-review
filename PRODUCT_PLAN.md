@@ -300,9 +300,10 @@ references to versions and alone does not make unpublished dependencies availabl
 (https://github.com/pnpm/pnpm.io/blob/main/docs/workspaces.md). Prove installation
 and build with no sibling workspace or prepopulated package cache.
 
-Pinned MyanLex integration: `51d8d6353d7f08fe389e046fac4c5953a70de33b`.
-The repository contains verified package archives for this commit, versioned
-`0.0.0-mdr.51d8d6353d7f`. This is an integration baseline, not a production-readiness
+Pinned MyanLex integration: `ed55492497b7ae21329eb10930245ad31e853a08`
+(refreshed 2026-11-19 from `51d8d6353d7f` with unchanged engine sources; see
+`vendor/myanlex/README.md`). The repository contains verified package archives
+for this commit, versioned `0.0.0-mdr.ed55492497b7`. This is an integration baseline, not a production-readiness
 or independent linguistic-validation claim.
 
 ## Milestone one progress — 2026-09-27

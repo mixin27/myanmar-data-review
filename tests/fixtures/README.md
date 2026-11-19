@@ -2,7 +2,8 @@
 
 `detection-v1.json` is an unchanged copy of MyanLex
 `corpus/encoding/detection-v1.json` at commit
-`51d8d6353d7f08fe389e046fac4c5953a70de33b`. It records its sources,
+`51d8d6353d7f08fe389e046fac4c5953a70de33b`; the file is unchanged at the
+current pin `ed55492497b7ae21329eb10930245ad31e853a08`. It records its sources,
 derivation and Apache-2.0 redistribution license in the file. The full license
 and Google/MyanLex notices are in `public/licenses/` and ship with the app.
 

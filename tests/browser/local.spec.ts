@@ -64,7 +64,7 @@ test("production worker matches pinned services and does not upload or persist t
     expect(result.detection).toEqual(application.detectText({ text }));
     expect(result.engine.mode).toBe("local");
     expect(result.engine.upstreamCommit).toBe(
-      "51d8d6353d7f08fe389e046fac4c5953a70de33b",
+      "ed55492497b7ae21329eb10930245ad31e853a08",
     );
     expect(result.conversion).toBeNull();
     expect(result.normalization).toBeNull();

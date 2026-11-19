@@ -11,7 +11,7 @@ import tarfile
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-COMMIT = '51d8d6353d7f08fe389e046fac4c5953a70de33b'
+COMMIT = 'ed55492497b7ae21329eb10930245ad31e853a08'
 VERSION = '0.0.0-mdr.' + COMMIT[:12]
 PACKAGES = ['types', 'core', 'application']
 
@@ -54,7 +54,10 @@ def main():
     notices.mkdir(parents=True, exist_ok=True)
     (notices / 'MyanLex-MIT.txt').write_bytes(git('show', COMMIT + ':LICENSE'))
     (notices / 'MyanLex-THIRD_PARTY_NOTICES.md').write_bytes(git('show', COMMIT + ':THIRD_PARTY_NOTICES.md'))
+    # Full Unicode License v3 text for the Unicode-derived tables in core, as bundled upstream.
+    (notices / 'Unicode-3.0.txt').write_bytes(git('show', COMMIT + ':packages/core/licenses/Unicode-3.0.txt'))
     apache = (notices / 'Apache-2.0.txt').read_bytes()
+    unicode_license = (notices / 'Unicode-3.0.txt').read_bytes()
     artifacts = []
     with tempfile.TemporaryDirectory(prefix='mdr-myanlex-build-') as temp:
         stage = pathlib.Path(temp)
@@ -74,7 +77,7 @@ def main():
             meta['version'] = VERSION
             meta.pop('scripts', None)
             meta.pop('devDependencies', None)
-            meta['files'] = ['dist', 'LICENSE', 'Apache-2.0.txt', 'THIRD_PARTY_NOTICES.md', 'BUILD_IDENTITY.json']
+            meta['files'] = ['dist', 'LICENSE', 'Apache-2.0.txt', 'Unicode-3.0.txt', 'THIRD_PARTY_NOTICES.md', 'BUILD_IDENTITY.json']
             if 'dependencies' in meta:
                 meta['dependencies'] = {key: VERSION for key in meta['dependencies']}
             write_json(package / 'package.json', meta)
@@ -90,11 +93,12 @@ def main():
             subprocess.run(['node', str(tsc), '-p', str(package / 'tsconfig.build.json')], check=True)
             (package / 'LICENSE').write_bytes((notices / 'MyanLex-MIT.txt').read_bytes())
             (package / 'Apache-2.0.txt').write_bytes(apache)
+            (package / 'Unicode-3.0.txt').write_bytes(unicode_license)
             (package / 'THIRD_PARTY_NOTICES.md').write_bytes((notices / 'MyanLex-THIRD_PARTY_NOTICES.md').read_bytes())
             write_json(package / 'BUILD_IDENTITY.json', identity)
             entries = [p for p in package.rglob('*') if p.is_file() and
                        (p.relative_to(package).parts[0] == 'dist' or p.name in
-                        ['package.json', 'LICENSE', 'Apache-2.0.txt', 'THIRD_PARTY_NOTICES.md', 'BUILD_IDENTITY.json'])]
+                        ['package.json', 'LICENSE', 'Apache-2.0.txt', 'Unicode-3.0.txt', 'THIRD_PARTY_NOTICES.md', 'BUILD_IDENTITY.json'])]
             tar_bytes = io.BytesIO()
             with tarfile.open(fileobj=tar_bytes, mode='w', format=tarfile.USTAR_FORMAT) as archive:
                 for path in sorted(entries):
