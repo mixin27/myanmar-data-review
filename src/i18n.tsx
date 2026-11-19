@@ -5,8 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import myanmar from "./locales/my.json";
-const messages: Record<string, string> = myanmar;
+import { translate } from "./messages";
 type Language = "en" | "my";
 const LanguageContext = createContext({
   language: "en" as Language,
@@ -22,7 +21,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [language]);
   const t = (text: string) => {
     if (language === "en") return text;
-    const translation = messages[text.trim()];
+    const translation = translate(text.trim());
     return translation === undefined
       ? text
       : text.replace(text.trim(), translation);

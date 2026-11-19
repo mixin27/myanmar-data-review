@@ -4,6 +4,7 @@ import { ProjectClient } from "../project/client";
 import type { ProjectSnapshot } from "../project/contracts";
 import { listProjects, loadProject } from "../project/storage";
 import type { SavedProject, ProjectEntry } from "../project/storage";
+import { userMessage } from "../messages";
 export interface OpenedProject {
   snapshot: ProjectSnapshot;
   file: File;
@@ -51,11 +52,7 @@ export function ProjectLibrary({
         dialog.current?.close();
       }
     } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "This project could not be opened.",
-      );
+      setError(userMessage(error, "This project could not be opened."));
     } finally {
       setBusy(false);
       setPreparing(false);
@@ -157,11 +154,7 @@ export function ProjectLibrary({
                       ),
                     )
                     .catch((error) =>
-                      setError(
-                        error instanceof Error
-                          ? error.message
-                          : "Could not open project.",
-                      ),
+                      setError(userMessage(error, "Could not open project.")),
                     );
                 }}
               >

@@ -536,3 +536,56 @@ test("Myanmar import controls and draft navigation remain usable", async ({
     ),
   ).toBe(true);
 });
+
+test("Myanmar interface shows file and backup errors in Myanmar", async ({
+  page,
+}) => {
+  const english = /\b(the|this|file|choose|backup|record|line)\b/i;
+  await page.goto("/");
+  await page.getByLabel("Language / ဘာသာစကား").selectOption("my");
+  await page
+    .getByRole("button", { name: "ပရောဂျက်နှင့် အရန်ဖိုင်များ" })
+    .click();
+  const backup = page.getByLabel("ပရောဂျက် အရန်ဖိုင် ရွေးရန်");
+  for (const [content, message] of [
+    [
+      '{"format":"myanmar-data-review","version":99}',
+      "ဤအရန်ဖိုင်ဗားရှင်းကို မပံ့ပိုးပါ။",
+    ],
+    ["not json", "ဤဖိုင်သည် မှန်ကန်သော ပရောဂျက် အရန်ဖိုင် မဟုတ်ပါ။"],
+  ] as const) {
+    await backup.setInputFiles({
+      name: "backup.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(content),
+    });
+    const problem = page.getByRole("alert").filter({ hasText: message });
+    await expect(problem).toBeVisible();
+    await expect(problem).not.toContainText(english);
+  }
+  await page
+    .locator("dialog[open]")
+    .getByRole("button", { name: "ပိတ်ရန်" })
+    .click();
+
+  const csv = page.getByLabel("CSV ဖိုင်ရွေးရန်", { exact: true });
+  await csv.setInputFiles({
+    name: "invalid.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from([0x61, 0x0a, 0xc3, 0x28]),
+  });
+  const alert = page.getByRole("alert");
+  await expect(alert).toContainText("မှန်ကန်သော UTF-8 မဟုတ်ပါ");
+  await expect(alert).not.toContainText(english);
+
+  await csv.setInputFiles({
+    name: "uneven.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from("ID,Text\n1,a\n2,b,c\n"),
+  });
+  await expect(alert).toContainText(
+    "ဤမှတ်တမ်းတွင် တန်ဖိုး 3 ခု ရှိပြီး ပထမမှတ်တမ်းတွင် 2 ခု ရှိသည်။",
+  );
+  await expect(alert).toContainText("စာကြောင်း");
+  await expect(alert).not.toContainText(english);
+});

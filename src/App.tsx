@@ -1,4 +1,5 @@
 import { LanguagePicker, useI18n } from "./i18n";
+import { userMessage } from "./messages";
 import { ProjectLibrary } from "./components/ProjectLibrary";
 import type { OpenedProject } from "./components/ProjectLibrary";
 import { useEffect, useRef, useState } from "react";
@@ -831,13 +832,20 @@ export function App() {
                 ? t("We couldn’t display this file")
                 : t("We couldn’t open this file")}
             </strong>
-            <p>{t(problem.message)}</p>
+            <p>
+              {t(
+                userMessage(
+                  problem.message,
+                  "We could not read this file. Choose it again to retry.",
+                ),
+              )}
+            </p>
             {problem.record && (
               <p className="error-location">
                 {t("Record ")}
                 {problem.record}
-                {problem.line ? ` · Line ${problem.line}` : ""}
-                {problem.field ? ` · Field ${problem.field}` : ""}
+                {problem.line ? ` · ${t("Line")} ${problem.line}` : ""}
+                {problem.field ? ` · ${t("Field")} ${problem.field}` : ""}
               </p>
             )}
             {step === "layout" && (

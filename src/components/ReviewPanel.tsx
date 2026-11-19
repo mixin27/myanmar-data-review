@@ -1,4 +1,5 @@
 import { useI18n } from "../i18n";
+import { userMessage } from "../messages";
 import {
   changedRange,
   emptyFilters,
@@ -161,11 +162,7 @@ export function ReviewPanel({
       setError("");
       refresh();
     } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "This action could not be completed.",
-      );
+      setError(userMessage(error, "This action could not be completed."));
     }
   }
   async function run(nextSettings = settings) {
@@ -213,11 +210,7 @@ export function ReviewPanel({
       }
     } catch (error) {
       if (current === revision.current)
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Inspection could not finish. Try again.",
-        );
+        setError(userMessage(error, "Inspection could not finish. Try again."));
     } finally {
       if (current === revision.current) {
         importer.current?.close();

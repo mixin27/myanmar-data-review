@@ -767,3 +767,34 @@ Verification — completed 2026-09-30:
   API/authentication remain deferred. Next milestone: address release verification
   and translation/error-message coverage without treating these feature checks as
   production-release approval.
+
+## Release hardening progress — 2026-11-19
+
+Implemented:
+
+- Every interface message has Myanmar text, including 67 file, storage, backup,
+  export and review errors that previously fell back to English, plus the import
+  error location (“Line”, “Field”). Messages with numbers use `{0}` placeholders.
+  These are drafted translations; native-speaker review remains a release gate.
+- Errors reach the interface only when written for people (`src/messages.ts`).
+  Internal invariant errors and browser exception text show the existing general
+  message instead, in both languages. Nothing is logged.
+- `tests/i18n.test.ts` fails when any sentence in `src/` lacks a translation, when a
+  translation's placeholders differ, or when untranslated text would be shown. A
+  Myanmar browser test covers invalid UTF-8, uneven records and invalid backups.
+- Hosted Ubuntu CI, first run 2026-11-19 (run 44515020749), passed every check
+  including 34 Firefox tests. README and `docs/RELEASE_VALIDATION.md` now record
+  this, with a release gates table and scripts for the person-only gates.
+- No new dependency, MyanLex modification, engine or artifact change.
+
+Verification — completed 2026-11-19:
+
+- `pnpm format:check` and `pnpm check` passed: 106 unit tests, build and isolated
+  consumer.
+- `pnpm test:browser --project=chromium --project=webkit`: 70 passed.
+  `pnpm test:production --project=chromium --project=webkit`: 6 passed.
+- `pnpm verify:clean`: frozen install, formatting, `pnpm check` and 70 Chromium and
+  WebKit tests passed; all 35 Firefox tests failed at launch with “Could not find
+  profile folder” (the local macOS blocker). Firefox evidence comes from hosted CI.
+- Still outstanding: native-speaker translation review, screen readers, shipping
+  Safari/iOS, physical low-memory devices and representative operator tasks.
