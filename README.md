@@ -148,7 +148,7 @@ prevent stale tabs from overwriting a checkpoint. See
 [AGENTS.md](AGENTS.md).
 
 [The artifact manifest and recipe](vendor/myanlex/README.md) pin upstream commit
-`51d8d6353d7f08fe389e046fac4c5953a70de33b`, package SHA-256/SHA-512 integrity,
+`ed55492497b7ae21329eb10930245ad31e853a08`, package SHA-256/SHA-512 integrity,
 compiler/build identity and licenses. The sibling MyanLex source is read-only and
 never required by normal installation or CI. The product is `UNLICENSED`; dependency
 licenses retain their terms and ship in `dist/licenses/`.

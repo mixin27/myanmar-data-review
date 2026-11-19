@@ -878,6 +878,7 @@ export function App() {
             {t("Third-party notices ")}
           </a>
           <a href="/licenses/Apache-2.0.txt">{t("Apache-2.0")}</a>
+          <a href="/licenses/Unicode-3.0.txt">{t("Unicode-3.0")}</a>
         </details>
       </footer>
       <dialog

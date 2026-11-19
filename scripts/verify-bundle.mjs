@@ -53,6 +53,7 @@ for (const file of [
   "Apache-2.0.txt",
   "MyanLex-MIT.txt",
   "MyanLex-THIRD_PARTY_NOTICES.md",
+  "Unicode-3.0.txt",
 ])
   assert.ok(existsSync(join(output, "licenses", file)));
 console.log(

@@ -163,23 +163,23 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@myanlex/types': file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz
-  '@myanlex/core': file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz
-  '@myanlex/application': file:vendor/myanlex/myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz
+  '@myanlex/types': file:vendor/myanlex/myanlex-types-0.0.0-mdr.ed55492497b7.tgz
+  '@myanlex/core': file:vendor/myanlex/myanlex-core-0.0.0-mdr.ed55492497b7.tgz
+  '@myanlex/application': file:vendor/myanlex/myanlex-application-0.0.0-mdr.ed55492497b7.tgz
 
 importers:
 
   .:
     dependencies:
       '@myanlex/application':
-        specifier: file:vendor/myanlex/myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz
-        version: file:vendor/myanlex/myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz
+        specifier: file:vendor/myanlex/myanlex-application-0.0.0-mdr.ed55492497b7.tgz
+        version: file:vendor/myanlex/myanlex-application-0.0.0-mdr.ed55492497b7.tgz
       '@myanlex/core':
-        specifier: file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz
-        version: file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz
+        specifier: file:vendor/myanlex/myanlex-core-0.0.0-mdr.ed55492497b7.tgz
+        version: file:vendor/myanlex/myanlex-core-0.0.0-mdr.ed55492497b7.tgz
       '@myanlex/types':
-        specifier: file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz
-        version: file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz
+        specifier: file:vendor/myanlex/myanlex-types-0.0.0-mdr.ed55492497b7.tgz
+        version: file:vendor/myanlex/myanlex-types-0.0.0-mdr.ed55492497b7.tgz
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -322,17 +322,20 @@ packages:
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
 
-  '@myanlex/application@file:vendor/myanlex/myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz':
-    resolution: {integrity: sha512-WOD4xpNedmeVyZ+jwUB8DcF2TvFIiSAXMzb5bQeEe2S4kbsh0zz+ulHZ2nWakdOu/VMwXg/u6XsxsakDSmEY0A==, tarball: file:vendor/myanlex/myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz}
-    version: 0.0.0-mdr.51d8d6353d7f
+  '@myanlex/application@file:vendor/myanlex/myanlex-application-0.0.0-mdr.ed55492497b7.tgz':
+    resolution: {integrity: sha512-mfGuO+OIcZw0ICXh4LYuQTTq20TS4m4MravgFSNsioZUBJxeMkszCSFU4B7SdZhr8/vBmUar/8ZJv5vcOTLWCA==, tarball: file:vendor/myanlex/myanlex-application-0.0.0-mdr.ed55492497b7.tgz}
+    version: 0.0.0-mdr.ed55492497b7
+    engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
 
-  '@myanlex/core@file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz':
-    resolution: {integrity: sha512-rafB6RopbP924vc66n1ZR8YIiIg0aKvtnwKtE6MsWHYo7FJAkYPUxeagHWKSDJ4WbR6GWWr36lO0D4gHvnXBQA==, tarball: file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz}
-    version: 0.0.0-mdr.51d8d6353d7f
+  '@myanlex/core@file:vendor/myanlex/myanlex-core-0.0.0-mdr.ed55492497b7.tgz':
+    resolution: {integrity: sha512-jMr9k+gX4CnTttM048FsVhBzdSkfOfMdi64Z8vwtQbARcO4WMskRl908Y/PP5HcR5ro79s2cTJfMN4qS/mU2Hg==, tarball: file:vendor/myanlex/myanlex-core-0.0.0-mdr.ed55492497b7.tgz}
+    version: 0.0.0-mdr.ed55492497b7
+    engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
 
-  '@myanlex/types@file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz':
-    resolution: {integrity: sha512-Wp0gFV8hq1HXoEPEhFcPbjPC3G08n9XuziQao10XllNBkPPnOZk0V2DyOki/kpIk/w7uVgFiAJ4Gj8kYlX/dDQ==, tarball: file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz}
-    version: 0.0.0-mdr.51d8d6353d7f
+  '@myanlex/types@file:vendor/myanlex/myanlex-types-0.0.0-mdr.ed55492497b7.tgz':
+    resolution: {integrity: sha512-QrO8GN7WJS2PiHpv/zh5s1wEPj+v2U/FqIKc4P5+U/CnBIgISvNSa6VwAJRdwWv4ZksGTTURvcrJqjpiwGwlSg==, tarball: file:vendor/myanlex/myanlex-types-0.0.0-mdr.ed55492497b7.tgz}
+    version: 0.0.0-mdr.ed55492497b7
+    engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
 
   '@oxc-project/types@0.151.0':
     resolution: {integrity: sha512-J1yXrIlNDZVzE3ada310xeAw7nH8yCAyLPuUIsjKatFPmfn5bS1oW+cM+QsGOtVWd5nhSpbwZWx/rue+r5Z+PA==}
@@ -1370,16 +1373,16 @@ snapshots:
 
   '@keyv/serialize@1.1.1': {}
 
-  '@myanlex/application@file:vendor/myanlex/myanlex-application-0.0.0-mdr.51d8d6353d7f.tgz':
+  '@myanlex/application@file:vendor/myanlex/myanlex-application-0.0.0-mdr.ed55492497b7.tgz':
     dependencies:
-      '@myanlex/core': file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz
-      '@myanlex/types': file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz
+      '@myanlex/core': file:vendor/myanlex/myanlex-core-0.0.0-mdr.ed55492497b7.tgz
+      '@myanlex/types': file:vendor/myanlex/myanlex-types-0.0.0-mdr.ed55492497b7.tgz
 
-  '@myanlex/core@file:vendor/myanlex/myanlex-core-0.0.0-mdr.51d8d6353d7f.tgz':
+  '@myanlex/core@file:vendor/myanlex/myanlex-core-0.0.0-mdr.ed55492497b7.tgz':
     dependencies:
-      '@myanlex/types': file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz
+      '@myanlex/types': file:vendor/myanlex/myanlex-types-0.0.0-mdr.ed55492497b7.tgz
 
-  '@myanlex/types@file:vendor/myanlex/myanlex-types-0.0.0-mdr.51d8d6353d7f.tgz': {}
+  '@myanlex/types@file:vendor/myanlex/myanlex-types-0.0.0-mdr.ed55492497b7.tgz': {}
 
   '@oxc-project/types@0.151.0': {}
 
