@@ -1,4 +1,5 @@
 import { useI18n } from "../i18n";
+import { userMessage } from "../messages";
 import { useEffect, useRef, useState } from "react";
 import type {
   ExportOptions,
@@ -99,11 +100,7 @@ export function ProjectActions({
       await action();
     } catch (error) {
       if (alive.current)
-        setError(
-          error instanceof Error
-            ? error.message
-            : "The operation could not finish.",
-        );
+        setError(userMessage(error, "The operation could not finish."));
     } finally {
       if (alive.current) {
         setPending(false);

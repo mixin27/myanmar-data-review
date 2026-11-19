@@ -61,8 +61,12 @@ parity with the pinned MyanLex services.
 
 ## Evidence boundaries
 
-Hosted CI requires an authorized push and has not run. No deployment, user study,
-physical mobile-device test or production readiness claim is implied by local tests.
+Hosted Ubuntu CI (`.github/workflows/ci.yml`) runs every check on each push and pull
+request. Its first runs passed on 2026-11-19 (run 44515020749 on `main`): 100 unit
+tests, 102 browser tests (34 each in Chromium, Firefox and WebKit), 9 production
+checks, the container package check and 9 container checks. No deployment, user
+study, physical mobile-device test or production readiness claim is implied by these
+automated results.
 Dependency and browser versions are pinned by the lockfile/Playwright installation.
 Configuration follows the official [Playwright browser guide](https://playwright.dev/docs/browsers);
 keyboard checks follow its [keyboard API](https://playwright.dev/docs/api/class-keyboard).
@@ -78,10 +82,51 @@ evidence, not proof of this machine's exact permission state. Moving only the
 profile to `/private/tmp` did not fix the previous reproduction.
 
 Do not disable Firefox, modify the browser binary or weaken macOS privacy settings
-just to get passing tests. Run the unchanged suite on a supported Linux environment
-or an upstream-fixed browser version once available and verified. Docker is installed
-locally but its daemon was unavailable during this validation; no Linux run is claimed.
-Hosted Ubuntu CI already includes Firefox but still needs an authorized push.
+just to get passing tests. Firefox is verified by hosted Ubuntu CI, which runs the
+unchanged suite: all 34 Firefox tests passed on 2026-11-19. The blocker is local to
+macOS; recheck it when Playwright ships a browser revision with an upstream fix.
+
+## Release gates
+
+| Gate                                                  | Status              | Evidence or next step                                    |
+| ----------------------------------------------------- | ------------------- | -------------------------------------------------------- |
+| Unit tests, lint, typecheck, build, isolated consumer | Automated, verified | `pnpm check`; hosted CI                                  |
+| Chromium, Firefox and WebKit workflows                | Automated, verified | `pnpm test:browser`; hosted CI on Ubuntu                 |
+| Production headers and container                      | Automated, verified | `pnpm test:production`, `pnpm test:container`; hosted CI |
+| Fresh checkout from the lockfile                      | Automated           | `pnpm verify:clean` (needs registry access)              |
+| Myanmar copy for every interface message              | Automated, verified | `tests/i18n.test.ts`; Myanmar browser tests              |
+| Firefox on macOS                                      | Blocked upstream    | See the Firefox section above                            |
+| Native-speaker review of Myanmar copy                 | Needs a person      | Translation review below                                 |
+| Screen reader (VoiceOver and/or NVDA)                 | Needs a person      | Screen-reader check below                                |
+| Shipping Safari and iOS                               | Needs a person      | Device check below                                       |
+| Physical low-memory device                            | Needs a person      | Device check below                                       |
+| Representative operator tasks                         | Needs a person      | Human validation above                                   |
+
+Record each person-only result as a dated entry in `PRODUCT_PLAN.md`: the browser or
+device, what was checked and what failed. Use synthetic data or copies the operator owns.
+
+### Translation review
+
+Switch to Myanmar and read every screen: file choice, layout, column choice, review,
+cell detail, export, projects and backups. Trigger the errors covered by
+`tests/browser/review.spec.ts` (invalid UTF-8, uneven records, unsupported or invalid
+backups). Note any wording that is wrong, unclear or inconsistent, and the screen
+where it appears. Translations live in `src/locales/my.json`; keys containing `{0}`
+are filled with numbers.
+
+### Screen-reader check
+
+With VoiceOver (Safari) and/or NVDA (Firefox or Chrome), complete human validation
+tasks 1, 3 and 5 using only the keyboard. Confirm that dialogs announce their title,
+focus returns to the control that opened them, progress and errors are announced,
+and Myanmar text is read in Myanmar.
+
+### Device check
+
+On a current iPhone or iPad in Safari, and on the lowest-memory device you expect
+operators to use, import the largest file you expect, inspect 10,000 cells, export,
+and save and reopen a backup. Record elapsed time and whether the browser reloaded
+the page or showed a memory error.
 
 ## Owner-only preview check (no testing team required)
 

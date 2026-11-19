@@ -113,7 +113,7 @@ Playwright starts/stops port 4173. Linux needs
 temporary directory, installs the frozen lockfile into an empty store, then runs
 formatting, all checks and browser tests. Registry access and an installed browser
 are required. CI runs the same checks on checkout with type generation before
-typechecking; hosted CI has not run because nothing has been pushed.
+typechecking; hosted Ubuntu CI runs on every push and pull request and first passed on 2026-11-19.
 
 Optional local supplied-file reproduction: set `MDR_LOCAL_CSV_FILES` to a JSON
 array of absolute CSV paths, then run `pnpm test:browser`. Those files are used
@@ -171,13 +171,16 @@ parser that needs a second quote-validation layer. It is covered by generated
 round-trip and arbitrary chunk-boundary tests. No dependencies were added for
 milestone two. Native controls and semantic tables support the tailored interface.
 
-Chromium and WebKit desktop/narrow workflows are tested on macOS ARM64. Firefox
-verification is blocked locally on macOS 27.0: its installed browser exits before launch with
-“Could not find profile folder,” including when using `/private/tmp`. The symptom matches an upstream startup issue; see the release guide for evidence.
-The full suite keeps Firefox enabled so this failure remains visible. To run the available engines:
+Chromium and WebKit desktop/narrow workflows are tested on macOS ARM64. Hosted
+Ubuntu CI runs the full suite in Chromium, Firefox and WebKit; all 102 browser tests
+first passed there on 2026-11-19. Firefox is blocked locally on macOS 27.0: its
+installed browser exits before launch with “Could not find profile folder,” including
+when using `/private/tmp`. The symptom matches an upstream startup issue; see the
+release guide for evidence. The full suite keeps Firefox enabled so this failure
+remains visible. To run the available engines locally:
 `pnpm test:browser --project=chromium --project=webkit`.
-Shipping Safari/iOS, screen readers, lower-powered devices and hosted Ubuntu CI
-remain unverified. Synthetic tests and engine parity do not establish linguistic accuracy.
+Shipping Safari/iOS, screen readers, lower-powered devices and native-speaker
+translation review remain unverified; the release guide lists each gate. Synthetic tests and engine parity do not establish linguistic accuracy.
 
 See [release validation and recovery](docs/RELEASE_VALIDATION.md) for recovery steps,
 operator tasks and outstanding release gates. `pnpm benchmark:browser` samples the

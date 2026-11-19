@@ -27,6 +27,8 @@ findings. Manual replacements still require individual approval.
 
 Use **Language / ဘာသာစကား** for English or Myanmar controls and explanations.
 Source text, column names and filenames remain untouched. The language choice is
-not saved and switching languages does not run processing. Some exceptional errors
-from lower-level file/storage operations may still appear in English. Translation
-quality needs independent native-speaker review before release.
+not saved and switching languages does not run processing. Every interface message,
+including file, storage and backup errors, has Myanmar text; a test fails if one is
+missing. Unexpected technical errors show a general message instead of browser or
+developer text. Translation quality needs independent native-speaker review before
+release.
